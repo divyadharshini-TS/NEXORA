@@ -1,93 +1,79 @@
 import React from 'react';
 import { 
   Users, FolderOpen, FileBarChart, Landmark, Settings, 
-  Activity, ArrowUpRight
+  Activity, ArrowUpRight, ShieldCheck
 } from 'lucide-react';
+import Sidebar from '../components/Sidebar';
 
 export default function AdminDashboard() {
   return (
-    <div className="flex" style={{ minHeight: 'calc(100vh - 70px)' }}>
-      {/* Sidebar */}
-      <aside style={{ width: '250px', backgroundColor: 'var(--dark-navy)', color: 'var(--white)', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-        <h2 className="mb-8" style={{ color: 'var(--white)', fontSize: '1.5rem' }}>Admin Panel</h2>
-        <div className="flex flex-col gap-2 flex-grow">
-          <a href="#" className="flex items-center gap-3 p-3 rounded text-white" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
-            <Activity size={20} /> Overview
-          </a>
-          <a href="#" className="flex items-center gap-3 p-3 rounded" style={{ color: 'var(--text-light)' }}>
-            <Users size={20} /> Users
-          </a>
-          <a href="#" className="flex items-center gap-3 p-3 rounded" style={{ color: 'var(--text-light)' }}>
-            <FolderOpen size={20} /> Business Categories
-          </a>
-          <a href="#" className="flex items-center gap-3 p-3 rounded" style={{ color: 'var(--text-light)' }}>
-            <Landmark size={20} /> Government Schemes
-          </a>
-          <a href="#" className="flex items-center gap-3 p-3 rounded" style={{ color: 'var(--text-light)' }}>
-            <FileBarChart size={20} /> Reports
-          </a>
-          <a href="#" className="flex items-center gap-3 p-3 rounded" style={{ color: 'var(--text-light)' }}>
-            <Settings size={20} /> Settings
-          </a>
-        </div>
-      </aside>
+    <div className="flex" style={{ minHeight: 'calc(100vh - 86px)' }}>
+      <Sidebar />
 
       {/* Main Content */}
       <main className="flex-grow p-8" style={{ backgroundColor: 'var(--bg-color)', overflowY: 'auto' }}>
-        <h1 className="mb-8" style={{ fontSize: '2rem' }}>Platform Analytics</h1>
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-1">
+            <ShieldCheck size={26} className="text-primary" />
+            <h1 style={{ fontSize: '2rem', letterSpacing: '-0.02em' }}>Platform Governance & Analytics</h1>
+          </div>
+          <p className="text-light text-sm">System performance, cohort conversion rates, and global venture throughput.</p>
+        </div>
 
-        <div className="grid grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           {[
-            { label: 'Total Users', value: '12,450', increase: '+15%' },
-            { label: 'Business Ideas', value: '3,842', increase: '+22%' },
-            { label: 'Reports Generated', value: '9,211', increase: '+18%' },
-            { label: 'Active Users (24h)', value: '1,120', increase: '+5%' }
+            { label: 'Total Registered Founders', value: '12,450', increase: '+15.4%' },
+            { label: 'Venture Concepts Tested', value: '3,842', increase: '+22.1%' },
+            { label: 'Dossiers Exported', value: '9,211', increase: '+18.0%' },
+            { label: 'Active Sessions (24h)', value: '1,120', increase: '+5.2%' }
           ].map((stat, i) => (
-            <div key={i} className="card">
-              <p className="text-light mb-2">{stat.label}</p>
-              <div className="flex justify-between items-end">
-                <span className="font-bold" style={{ fontSize: '2rem' }}>{stat.value}</span>
-                <span className="flex items-center text-success font-medium text-sm"><ArrowUpRight size={16}/> {stat.increase}</span>
+            <div key={i} className="card p-6 hover-lift" style={{ borderRadius: '20px' }}>
+              <p className="text-light text-xs font-semibold uppercase tracking-wider mb-2">{stat.label}</p>
+              <div className="flex justify-between items-baseline">
+                <span className="font-extrabold text-2xl text-primary">{stat.value}</span>
+                <span className="badge badge-success flex items-center gap-1 text-xs">
+                  <ArrowUpRight size={13}/> {stat.increase}
+                </span>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="card">
-          <h3 className="mb-6">Recent Activity</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-light)' }}>
-                <th className="pb-3">User</th>
-                <th className="pb-3">Action</th>
-                <th className="pb-3">Date</th>
-                <th className="pb-3">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { user: 'john.doe@example.com', action: 'Analyzed Idea: EcoBox', date: '2 mins ago', status: 'Completed' },
-                { user: 'jane.smith@example.com', action: 'Generated PDF Report', date: '15 mins ago', status: 'Completed' },
-                { user: 'mike.jones@example.com', action: 'Applied for Startup India', date: '1 hour ago', status: 'Pending' },
-                { user: 'sarah.w@example.com', action: 'Registered Account', date: '3 hours ago', status: 'Completed' }
-              ].map((row, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td className="py-4 font-medium">{row.user}</td>
-                  <td className="py-4">{row.action}</td>
-                  <td className="py-4" style={{ color: 'var(--text-light)' }}>{row.date}</td>
-                  <td className="py-4">
-                    <span style={{ 
-                      background: row.status === 'Completed' ? '#dcfce7' : '#fef3c7', 
-                      color: row.status === 'Completed' ? 'var(--success)' : '#d97706', 
-                      padding: '0.3rem 0.6rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 'bold' 
-                    }}>
-                      {row.status}
-                    </span>
-                  </td>
+        <div className="card p-7 shadow-sm" style={{ borderRadius: '22px' }}>
+          <h3 className="font-bold text-lg mb-1">Real-time Platform Activity</h3>
+          <p className="text-light text-xs mb-6">Recent user interactions, grant matches, and report triggers</p>
+          
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-light)', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <th className="pb-3 font-semibold">User</th>
+                  <th className="pb-3 font-semibold">Action Trigger</th>
+                  <th className="pb-3 font-semibold">Timestamp</th>
+                  <th className="pb-3 font-semibold">Diagnostic State</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {[
+                  { user: 'alex.m@venturehub.io', action: 'Analyzed Idea: EcoBox Packaging', date: '2 mins ago', status: 'Completed' },
+                  { user: 'divya@technovate.co', action: 'Generated Full PDF Dossier', date: '14 mins ago', status: 'Completed' },
+                  { user: 'rahul.k@agripro.in', action: 'Bookmarked Startup India Seed Fund', date: '45 mins ago', status: 'Bookmarked' },
+                  { user: 'sarah.lin@nexora.ai', action: 'Created Verified Workspace', date: '2 hours ago', status: 'Completed' }
+                ].map((row, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid var(--border)', fontSize: '0.88rem' }}>
+                    <td className="py-4 font-medium text-primary">{row.user}</td>
+                    <td className="py-4 text-light">{row.action}</td>
+                    <td className="py-4 text-light text-xs">{row.date}</td>
+                    <td className="py-4">
+                      <span className={`badge ${row.status === 'Completed' ? 'badge-success' : 'badge-primary'}`}>
+                        {row.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </main>
     </div>
