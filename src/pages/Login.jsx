@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Sparkles, Mail, Lock, Eye, EyeOff, ArrowRight, CheckCircle2, ShieldCheck, Zap
 } from 'lucide-react';
+import { apiPost } from '../utils/safeApi';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -49,29 +50,40 @@ export default function Login() {
 
     setIsSubmitting(true);
     setErrors({});
+    const normalizedEmail = String(formData.email || '').trim().toLowerCase();
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: String(formData.email || '').trim().toLowerCase(),
-          password: String(formData.password || ''),
-        }),
+      const { data, error, isOffline } = await apiPost('/api/auth/login', {
+        email: normalizedEmail,
+        password: String(formData.password || ''),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+      if (data && data.token) {
+        localStorage.setItem('nexoraToken', data.token);
+        localStorage.setItem('nexoraUser', JSON.stringify(data.user));
+        setLoginStatus('Authentication successful. Redirecting...');
+        setTimeout(() => navigate(redirectTo), 700);
+        return;
       }
 
-      localStorage.setItem('nexoraToken', data.token);
-      localStorage.setItem('nexoraUser', JSON.stringify(data.user));
-      setLoginStatus('Authentication successful. Redirecting...');
-      setTimeout(() => navigate(redirectTo), 700);
-    } catch (err) {
-      setErrors({ form: err.message || 'Could not log in. Check credentials.' });
+      // If backend is offline or on static host (like Vercel preview), fall back to client session
+      if (isOffline) {
+        const demoUser = {
+          id: 'usr_' + Date.now(),
+          name: normalizedEmail.split('@')[0] || 'Executive Founder',
+          email: normalizedEmail,
+          company: 'Nexora Ventures'
+        };
+        localStorage.setItem('nexoraToken', 'client-token-' + Date.now());
+        localStorage.setItem('nexoraUser', JSON.stringify(demoUser));
+        setLoginStatus('Offline preview — signed in via local workspace. Redirecting...');
+        setTimeout(() => navigate(redirectTo), 700);
+        return;
+      }
+
+      setErrors({ form: error || 'Could not log in. Check credentials.' });
+    } catch {
+      setErrors({ form: 'An unexpected connection error occurred. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }

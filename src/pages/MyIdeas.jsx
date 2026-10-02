@@ -5,6 +5,7 @@ import {
   AlertTriangle, Target, Layers
 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
+import { apiGet } from '../utils/safeApi';
 
 export default function MyIdeas() {
   const navigate = useNavigate();
@@ -18,14 +19,12 @@ export default function MyIdeas() {
       setLoading(true);
       setError('');
       try {
-        const token = localStorage.getItem('nexoraToken');
-        const res = await fetch('/api/analyze/mine', {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        if (!res.ok) throw new Error('Failed to load ideas');
-        const data = await res.json();
-        setIdeas(data || []);
-      } catch (err) {
+        const { data } = await apiGet('/api/analyze/mine');
+        if (data && Array.isArray(data) && data.length > 0) {
+          setIdeas(data);
+          return;
+        }
+
         // Check localStorage fallback
         try {
           const user = JSON.parse(localStorage.getItem('nexoraUser') || 'null');
@@ -33,10 +32,10 @@ export default function MyIdeas() {
           const local = JSON.parse(localStorage.getItem(key) || '[]');
           if (local.length > 0) {
             setIdeas(local);
-            setLoading(false);
             return;
           }
         } catch {}
+
         // High-end default sample ideas
         setIdeas([
           {
@@ -64,6 +63,8 @@ export default function MyIdeas() {
             description: 'IoT-monitored refrigerated transport for insulin and biologics.'
           }
         ]);
+      } catch (err) {
+        console.warn('Load ideas fallback:', err);
       } finally {
         setLoading(false);
       }

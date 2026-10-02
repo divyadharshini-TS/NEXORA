@@ -4,6 +4,7 @@ import {
   Filter, Sparkles, CheckCircle2, DollarSign, Layers
 } from 'lucide-react';
 import { DEFAULT_SCHEMES } from '../data/defaultSchemes';
+import { apiGet } from '../utils/safeApi';
 
 export default function Schemes() {
   const [schemes, setSchemes] = useState(DEFAULT_SCHEMES);
@@ -21,15 +22,13 @@ export default function Schemes() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/schemes');
-        if (!res.ok) throw new Error('Failed to load');
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
+        const { data } = await apiGet('/api/schemes');
+        if (data && Array.isArray(data) && data.length > 0) {
           setSchemes(data);
         } else {
           setSchemes(DEFAULT_SCHEMES);
         }
-      } catch (err) {
+      } catch {
         setSchemes(DEFAULT_SCHEMES);
       } finally {
         setLoading(false);

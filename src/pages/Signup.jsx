@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
   Sparkles, Mail, Lock, User, Eye, EyeOff, CheckCircle2, ShieldCheck
 } from 'lucide-react';
+import { apiPost } from '../utils/safeApi';
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -43,27 +44,37 @@ export default function Signup() {
     const normalizedEmail = String(formData.email || '').trim().toLowerCase();
 
     try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.fullName,
-          email: normalizedEmail,
-          password: formData.password,
-          company: formData.organization || 'Venture Studio',
-          location: formData.location || 'India'
-        }),
+      const { data, error } = await apiPost('/api/auth/signup', {
+        name: formData.fullName,
+        email: normalizedEmail,
+        password: formData.password,
+        company: formData.organization || 'Venture Studio',
+        location: formData.location || 'India'
       });
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Signup failed');
+      if (data && data.token) {
+        localStorage.setItem('nexoraToken', data.token);
+        localStorage.setItem('nexoraUser', JSON.stringify(data.user));
+        navigate('/dashboard');
+        return;
       }
 
-      localStorage.setItem('nexoraToken', data.token);
-      localStorage.setItem('nexoraUser', JSON.stringify(data.user));
+      // If backend returned explicit validation error (e.g. email exists)
+      if (error && !error.includes('offline') && !error.includes('not found') && !error.includes('Server returned HTTP')) {
+        setErrors({ form: error });
+        return;
+      }
+
+      // Local fallback for offline/client preview
+      localStorage.setItem('nexoraToken', 'client-token-' + Date.now());
+      localStorage.setItem('nexoraUser', JSON.stringify({
+        id: 'usr_' + Date.now(),
+        name: formData.fullName,
+        email: normalizedEmail,
+        company: formData.organization || 'Venture Studio'
+      }));
       navigate('/dashboard');
-    } catch (err) {
+    } catch {
       // Local fallback for client-only prototype
       localStorage.setItem('nexoraToken', 'client-token-' + Date.now());
       localStorage.setItem('nexoraUser', JSON.stringify({

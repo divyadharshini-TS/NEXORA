@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Bell, CheckCircle, Award, Sparkles, CheckCheck, Info, ShieldCheck } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
+import { apiGet } from '../utils/safeApi';
 
 export default function Notifications() {
   const [notes, setNotes] = useState([]);
@@ -35,12 +36,9 @@ export default function Notifications() {
     const load = async () => {
       setLoading(true);
       try {
-        const token = localStorage.getItem('nexoraToken');
-        const res = await fetch('/api/notifications', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-        if (!res.ok) throw new Error('Failed to load notifications');
-        const data = await res.json();
+        const { data } = await apiGet('/api/notifications');
         setNotes(Array.isArray(data) && data.length > 0 ? data : defaultNotes);
-      } catch (err) {
+      } catch {
         setNotes(defaultNotes);
       } finally {
         setLoading(false);

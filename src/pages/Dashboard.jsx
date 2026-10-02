@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { DEFAULT_SCHEMES } from '../data/defaultSchemes';
 import Sidebar from '../components/Sidebar';
+import { apiGet } from '../utils/safeApi';
 
 const FALLBACK = {
   businessName: 'EcoBox Sustainable Packaging',
@@ -76,13 +77,9 @@ export default function Dashboard() {
 
       if (!current) {
         try {
-          const token = localStorage.getItem('nexoraToken');
-          const res = await fetch('/api/analyze/mine', {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
-          if (res.ok) {
-            const list = await res.json();
-            if (Array.isArray(list) && list.length > 0) current = list[0];
+          const { data } = await apiGet('/api/analyze/mine');
+          if (data && Array.isArray(data) && data.length > 0) {
+            current = data[0];
           }
         } catch {}
       }
@@ -100,9 +97,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchSchemes = async () => {
       try {
-        const res = await fetch('/api/schemes');
-        if (!res.ok) throw new Error();
-        const data = await res.json();
+        const { data } = await apiGet('/api/schemes');
         setSchemes(Array.isArray(data) && data.length > 0 ? data : DEFAULT_SCHEMES);
       } catch {
         setSchemes(DEFAULT_SCHEMES);

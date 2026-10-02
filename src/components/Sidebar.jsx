@@ -4,6 +4,7 @@ import {
   LayoutDashboard, FolderOpen, FileBarChart, Landmark, Settings, 
   User, Bell, PlusCircle, Sparkles, ChevronRight, ShieldCheck, X
 } from 'lucide-react';
+import { apiGet } from '../utils/safeApi';
 
 export default function Sidebar({ isDemo = false, isOpen = false, onClose = () => {} }) {
   const location = useLocation();
@@ -14,17 +15,12 @@ export default function Sidebar({ isDemo = false, isOpen = false, onClose = () =
       try {
         const token = localStorage.getItem('nexoraToken');
         if (!token) return;
-        const res = await fetch('/api/notifications', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) {
-            const unread = data.filter(n => n.unread !== false).length;
-            setUnreadCount(unread || data.length);
-          }
+        const { data } = await apiGet('/api/notifications', token);
+        if (data && Array.isArray(data)) {
+          const unread = data.filter(n => n.unread !== false).length;
+          setUnreadCount(unread || data.length);
         }
-      } catch (e) {
+      } catch {
         // keep fallback
       }
     };

@@ -5,6 +5,7 @@ import {
   CheckCircle2, Sparkles, FolderOpen, Target
 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
+import { apiGet } from '../utils/safeApi';
 
 export default function Reports() {
   const navigate = useNavigate();
@@ -18,15 +19,13 @@ export default function Reports() {
       setLoading(true);
       setError('');
       try {
-        const token = localStorage.getItem('nexoraToken');
-        const res = await fetch('/api/analyze/summary', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-        if (res.ok) {
-          const data = await res.json();
-          setSummary(data || { total: 0, avgScore: 0, recent: [] });
+        const { data } = await apiGet('/api/analyze/summary');
+        if (data && typeof data.total === 'number') {
+          setSummary(data);
         } else {
           loadLocalSummary();
         }
-      } catch (err) {
+      } catch {
         loadLocalSummary();
       } finally {
         setLoading(false);

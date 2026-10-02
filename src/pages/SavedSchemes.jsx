@@ -3,6 +3,7 @@ import { ArrowRight, Landmark, ExternalLink, BookmarkCheck, Sparkles } from 'luc
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { DEFAULT_SCHEMES } from '../data/defaultSchemes';
+import { apiGet } from '../utils/safeApi';
 
 export default function SavedSchemes() {
   const [schemes, setSchemes] = useState([]);
@@ -12,18 +13,14 @@ export default function SavedSchemes() {
     const load = async () => {
       setLoading(true);
       try {
-        const token = localStorage.getItem('nexoraToken');
-        const res = await fetch('/api/schemes/saved', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            setSchemes(data);
-            setLoading(false);
-            return;
-          }
+        const { data } = await apiGet('/api/schemes/saved');
+        if (data && Array.isArray(data) && data.length > 0) {
+          setSchemes(data);
+          setLoading(false);
+          return;
         }
-      } catch (err) {
-        console.warn(err);
+      } catch {
+        // Fall back to local bookmarks
       }
 
       // Fallback: check locally bookmarked names
