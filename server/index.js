@@ -48,6 +48,24 @@ app.use('/api/analyze', analysisRoutes);
 app.use('/api/schemes', schemeRoutes);
 app.use('/api/notifications', notificationRoutes);
 
+// ─── 404 handler: always return JSON, never HTML ───────────────────────────
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: `Route ${req.method} ${req.path} does not exist on this server.`,
+  });
+});
+
+// ─── Global error handler: always return JSON, never HTML ──────────────────
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error('[Server Error]', err.message);
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({
+    error: err.message || 'Internal Server Error',
+  });
+});
+
 const startServer = async () => {
   try {
     await mongoose.connect(mongoUri, {
