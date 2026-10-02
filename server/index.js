@@ -15,7 +15,24 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/nexora';
 
-app.use(cors());
+// CORS: allow local dev + Vercel production frontend
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:4173',
+  process.env.FRONTEND_URL, // e.g. https://nexora.vercel.app
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Render health checks)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.some(o => origin.startsWith(o))) {
+      return callback(null, true);
+    }
+    callback(new Error(`CORS: origin ${origin} not allowed`));
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: '1mb' }));
 
 app.get('/api/health', (req, res) => {
