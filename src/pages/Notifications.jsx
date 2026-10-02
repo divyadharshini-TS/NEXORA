@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Bell, CheckCircle, Award, Sparkles, CheckCheck } from 'lucide-react';
+import { Bell, CheckCircle, Award, Sparkles, CheckCheck, Info, ShieldCheck } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 
 export default function Notifications() {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const defaultNotes = [
     {
@@ -20,6 +21,13 @@ export default function Notifications() {
       body: 'Your business concept "EcoBox Sustainable Packaging" received a comprehensive viability score of 84/100.',
       createdAt: new Date(Date.now() - 86400000).toISOString(),
       unread: false
+    },
+    {
+      id: 'n3',
+      title: 'TANSEED 6.0 Grant Window Announced',
+      body: 'Tamil Nadu Startup and Innovation Mission opens grant call offering up to ₹15 Lakhs for green-tech startups.',
+      createdAt: new Date(Date.now() - 172800000).toISOString(),
+      unread: false
     }
   ];
 
@@ -33,7 +41,6 @@ export default function Notifications() {
         const data = await res.json();
         setNotes(Array.isArray(data) && data.length > 0 ? data : defaultNotes);
       } catch (err) {
-        console.warn(err);
         setNotes(defaultNotes);
       } finally {
         setLoading(false);
@@ -47,75 +54,67 @@ export default function Notifications() {
   };
 
   return (
-    <div className="flex" style={{ minHeight: 'calc(100vh - 86px)' }}>
-      <Sidebar />
+    <div className="flex dashboard-layout" style={{ minHeight: 'calc(100vh - 74px)' }}>
+      <Sidebar isOpen={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} />
 
-      <main className="flex-grow p-8" style={{ backgroundColor: 'var(--bg-color)', overflowY: 'auto' }}>
+      <main className="flex-grow dashboard-main" style={{ backgroundColor: 'var(--bg-color)', overflowY: 'auto', padding: '1.5rem 2rem' }}>
+        <div className="dashboard-mobile-topbar" style={{ marginBottom: '0.5rem' }}>
+          <button className="sidebar-toggle-btn" onClick={() => setMobileSidebarOpen(true)} aria-label="Open menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+          </button>
+          <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-main)' }}>Alerts & Feed</span>
+        </div>
         <div className="flex flex-wrap justify-between items-center mb-8 gap-4 max-w-4xl">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <Bell size={26} className="text-primary" />
-              <h1 style={{ fontSize: '2rem', letterSpacing: '-0.02em' }}>Notifications & Alerts</h1>
+              <Bell size={24} className="text-accent" />
+              <h1 style={{ fontSize: '1.85rem', letterSpacing: '-0.03em' }}>System Alerts & Grant Feed</h1>
             </div>
             <p className="text-light text-sm">
-              Real-time updates regarding grant application windows, sector policy updates, and AI reports.
+              Regulatory deadlines, grant application openings, and diagnostic completions.
             </p>
           </div>
 
-          {notes.some(n => n.unread) && (
-            <button 
-              onClick={markAllRead} 
-              className="btn btn-outline flex items-center gap-1.5"
-              style={{ borderRadius: 'var(--radius-full)', padding: '0.45rem 1rem', fontSize: '0.85rem' }}
-            >
-              <CheckCheck size={16} /> Mark All as Read
-            </button>
-          )}
+          <button
+            onClick={markAllRead}
+            className="btn btn-outline text-xs flex items-center gap-1.5"
+            style={{ borderRadius: 'var(--radius-full)', padding: '0.5rem 1.15rem' }}
+          >
+            <CheckCheck size={14} /> Mark All as Read
+          </button>
         </div>
 
         {loading ? (
-          <div className="text-light p-12 text-center">Fetching your notification feeds...</div>
-        ) : notes.length === 0 ? (
-          <div className="card p-10 text-center max-w-md mx-auto" style={{ borderRadius: '24px' }}>
-            <Bell size={32} className="text-light mx-auto mb-3" />
-            <h3 className="mb-1 text-lg font-bold">All Caught Up</h3>
-            <p className="text-light text-sm">No unread notifications or funding alerts right now.</p>
-          </div>
+          <div className="text-light p-12 text-center text-sm">Fetching notifications...</div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 max-w-4xl">
+          <div className="flex flex-col gap-3.5 max-w-4xl">
             {notes.map((n) => (
-              <div 
-                key={n.id} 
-                className="card p-6 flex items-start gap-4 hover-lift"
-                style={{ 
-                  borderRadius: '18px', 
-                  border: '1px solid var(--border)',
-                  backgroundColor: n.unread ? 'rgba(99, 102, 241, 0.02)' : 'var(--white)'
+              <div
+                key={n.id}
+                className="card p-5 transition-all"
+                style={{
+                  borderRadius: '16px',
+                  backgroundColor: n.unread ? 'var(--bg-secondary)' : 'var(--bg-subtle)',
+                  borderColor: n.unread ? 'rgba(99, 102, 241, 0.3)' : 'var(--border)',
+                  boxShadow: n.unread ? 'var(--shadow-sm)' : 'none'
                 }}
               >
-                <div style={{ 
-                  width: '44px', height: '44px', borderRadius: '12px', 
-                  backgroundColor: n.unread ? 'rgba(99, 102, 241, 0.1)' : 'var(--bg-secondary)', 
-                  color: n.unread ? 'var(--secondary)' : 'var(--primary)', 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                  flexShrink: 0 
-                }}>
-                  <Sparkles size={20} />
-                </div>
-                <div className="flex-grow">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="font-bold text-base text-primary flex items-center gap-2">
-                      {n.title}
-                      {n.unread && (
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--secondary)', display: 'inline-block' }}></span>
-                      )}
-                    </div>
-                    <span className="text-xs text-light">
-                      {new Date(n.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                    </span>
+                <div className="flex items-start justify-between gap-4 mb-2">
+                  <div className="flex items-center gap-2.5">
+                    {n.unread ? (
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--accent)', flexShrink: 0 }} />
+                    ) : (
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--text-muted)', flexShrink: 0 }} />
+                    )}
+                    <h4 className="text-sm font-bold text-main">{n.title}</h4>
                   </div>
-                  <p className="text-sm text-light" style={{ lineHeight: '1.6' }}>{n.body}</p>
+                  <span className="text-xs text-muted font-mono flex-shrink-0">
+                    {new Date(n.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
+                <p className="text-xs text-light leading-relaxed pl-4">
+                  {n.body}
+                </p>
               </div>
             ))}
           </div>

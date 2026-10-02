@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle, ShieldAlert, Zap, Compass, DollarSign, Target } from 'lucide-react';
+import { 
+  Sparkles, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle, 
+  ShieldAlert, Zap, Compass, DollarSign, Target, Loader2, Info
+} from 'lucide-react';
 
 const initialFormData = {
   businessName: '',
@@ -18,7 +21,6 @@ export default function FormPage() {
   const [step, setStep] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
-  const [analyzedIdea, setAnalyzedIdea] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (event) => {
@@ -60,7 +62,6 @@ export default function FormPage() {
       }
 
       const result = await res.json();
-      setAnalyzedIdea(result);
 
       // Store as latest analysis for the Dashboard
       localStorage.setItem('latestAnalysis', JSON.stringify(result));
@@ -75,6 +76,9 @@ export default function FormPage() {
       } catch (err) {
         console.warn('History save failed:', err);
       }
+
+      // Navigate straight to executive dossier
+      navigate('/dashboard');
     } catch (err) {
       console.error('Analysis error:', err);
       setErrorMessage('Failed to complete AI analysis. Please verify your connection or inputs.');
@@ -84,305 +88,297 @@ export default function FormPage() {
   };
 
   const stepsMeta = [
-    { num: 1, title: 'Concept', subtitle: 'Name & value prop' },
+    { num: 1, title: 'Concept', subtitle: 'Name & value proposition' },
     { num: 2, title: 'Economics', subtitle: 'Capital & audience' },
-    { num: 3, title: 'Execution', subtitle: 'Stage & milestones' }
+    { num: 3, title: 'Execution', subtitle: 'Maturity & milestones' }
   ];
 
   return (
-    <div className="container py-16 animate-fade-in-up" style={{ maxWidth: '820px' }}>
+    <div className="container py-14 animate-fade-in-up" style={{ maxWidth: '840px' }}>
+      {/* Wizard Header */}
       <div className="text-center mb-10">
-        <span className="badge badge-primary mb-3">AI Diagnostic Wizard</span>
-        <h1 className="mb-3" style={{ fontSize: '2.5rem', letterSpacing: '-0.02em' }}>
+        <div className="badge badge-primary mb-3 font-mono">
+          <Sparkles size={13} className="text-accent" /> AI DIAGNOSTIC ENGINE
+        </div>
+        <h1 className="mb-2" style={{ fontSize: '2.4rem', letterSpacing: '-0.03em' }}>
           Evaluate Your Venture Hypothesis
         </h1>
-        <p className="text-light text-lg max-w-xl mx-auto">
-          Input your business model parameters. Our multi-tiered decision engine analyzes market fit, competitors, and funding feasibility.
+        <p className="text-light text-base max-w-lg mx-auto">
+          Input your business model parameters. Our multi-tiered decision engine evaluates TAM, competitive moats, and grant feasibility.
         </p>
       </div>
 
-      <div className="card p-8 md:p-10 shadow-lg" style={{ borderRadius: '24px' }}>
-        {/* Step Progression Bar */}
-        <div className="grid grid-cols-3 gap-2 mb-8 pb-6 border-b" style={{ borderColor: 'var(--border)' }}>
-          {stepsMeta.map((s) => (
-            <div 
-              key={s.num} 
-              className="flex items-center gap-3 cursor-pointer"
-              onClick={() => { if (s.num < step) setStep(s.num); }}
-            >
-              <div style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                backgroundColor: step >= s.num ? 'var(--primary)' : 'var(--bg-secondary)',
-                color: step >= s.num ? 'var(--white)' : 'var(--text-light)',
-                border: `1.5px solid ${step >= s.num ? 'var(--primary)' : 'var(--border)'}`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: '700',
-                fontSize: '0.9rem',
-                flexShrink: 0
-              }}>
-                {s.num}
-              </div>
-              <div className="hidden sm:block">
-                <div className="text-xs font-bold" style={{ color: step >= s.num ? 'var(--text-main)' : 'var(--text-light)' }}>
-                  {s.title}
+      {/* Step Indicator */}
+      <div className="card p-4 mb-8" style={{ borderRadius: '18px' }}>
+        <div className="grid grid-cols-3 gap-2">
+          {stepsMeta.map((s) => {
+            const isDone = step > s.num;
+            const isCurrent = step === s.num;
+            return (
+              <div 
+                key={s.num} 
+                className="flex items-center gap-3 p-2 rounded-xl transition-all"
+                style={{
+                  backgroundColor: isCurrent ? 'var(--bg-subtle)' : 'transparent',
+                  border: isCurrent ? '1px solid var(--border)' : '1px solid transparent'
+                }}
+              >
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: '700',
+                  fontSize: '0.85rem',
+                  backgroundColor: isDone ? 'var(--success)' : isCurrent ? 'var(--accent)' : 'var(--bg-subtle)',
+                  color: isDone || isCurrent ? '#fff' : 'var(--text-muted)',
+                  flexShrink: 0
+                }}>
+                  {isDone ? <CheckCircle size={16} /> : s.num}
                 </div>
-                <div className="text-xs text-light font-normal">{s.subtitle}</div>
+                <div className="hidden sm:block">
+                  <div className="text-xs font-bold leading-tight" style={{ color: isCurrent ? 'var(--text-main)' : 'var(--text-light)' }}>
+                    {s.title}
+                  </div>
+                  <div className="text-xs text-muted" style={{ fontSize: '0.72rem' }}>
+                    {s.subtitle}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+      </div>
 
-        {errorMessage && (
-          <div className="p-4 mb-6 rounded-xl bg-red-50 text-error flex items-center gap-2 border border-red-200">
-            <AlertTriangle size={18} /> {errorMessage}
-          </div>
-        )}
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="mb-6 p-4 rounded-xl flex items-center gap-3" style={{ backgroundColor: 'var(--error-bg)', border: '1px solid var(--error-border)', color: 'var(--error)' }}>
+          <AlertTriangle size={20} className="flex-shrink-0" />
+          <span className="text-sm font-medium">{errorMessage}</span>
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      {/* Form Card */}
+      <div className="card p-8 shadow-md" style={{ borderRadius: '24px' }}>
+        <form onSubmit={handleSubmit}>
+          
+          {/* Step 1: Concept */}
           {step === 1 && (
-            <div className="animate-fade-in flex flex-col gap-4">
-              <div>
-                <label className="form-label" htmlFor="bName">Venture / Business Name *</label>
+            <div className="animate-fade-in-up">
+              <h3 className="text-lg font-bold mb-1">Venture Concept & Sector</h3>
+              <p className="text-xs text-light mb-6">Describe the foundational problem and value proposition.</p>
+
+              <div className="form-group">
+                <label className="form-label" htmlFor="businessName">
+                  <span>Business or Project Name</span>
+                  <span className="text-xs text-light font-normal">Required</span>
+                </label>
                 <input
-                  id="bName"
-                  type="text"
+                  id="businessName"
                   name="businessName"
-                  className="form-input"
+                  type="text"
+                  required
                   value={formData.businessName}
                   onChange={handleChange}
-                  placeholder="e.g. CleanPulse Technologies"
-                  required
+                  placeholder="e.g. EcoBox Logistics, AgroPulse AI"
+                  className="form-input"
                 />
               </div>
 
-              <div>
-                <label className="form-label" htmlFor="bCat">Primary Industry Sector *</label>
+              <div className="form-group">
+                <label className="form-label" htmlFor="category">
+                  <span>Industry / Sector</span>
+                  <span className="text-xs text-light font-normal">Required</span>
+                </label>
                 <select
-                  id="bCat"
+                  id="category"
                   name="category"
-                  className="form-input"
+                  required
                   value={formData.category}
                   onChange={handleChange}
-                  required
+                  className="form-input"
+                  style={{ cursor: 'pointer' }}
                 >
-                  <option value="">Select industry category</option>
-                  <option value="saas">SaaS & Cloud Software</option>
-                  <option value="ecommerce">D2C & E-Commerce</option>
-                  <option value="healthtech">HealthTech & BioTech</option>
+                  <option value="">Select Primary Domain...</option>
+                  <option value="ecommerce">E-Commerce & D2C</option>
+                  <option value="agritech">Agritech & Food Processing</option>
+                  <option value="fintech">Fintech & Payments</option>
+                  <option value="healthtech">Healthtech & Diagnostics</option>
                   <option value="edtech">EdTech & Upskilling</option>
-                  <option value="fintech">FinTech & Payments</option>
-                  <option value="cleantech">CleanTech & Sustainability</option>
-                  <option value="other">Other / Multi-Sector</option>
+                  <option value="cleantech">CleanTech & Renewable Energy</option>
+                  <option value="saas">B2B SaaS / Enterprise Software</option>
+                  <option value="logistics">Supply Chain & Mobility</option>
                 </select>
               </div>
 
-              <div>
-                <label className="form-label" htmlFor="bDesc">Core Value Proposition & Description *</label>
+              <div className="form-group">
+                <label className="form-label" htmlFor="description">
+                  <span>Elevator Pitch & Core Value Proposition</span>
+                  <span className="text-xs text-light font-normal">2-3 sentences</span>
+                </label>
                 <textarea
-                  id="bDesc"
+                  id="description"
                   name="description"
-                  className="form-input"
-                  rows="4"
+                  required
+                  rows={4}
                   value={formData.description}
                   onChange={handleChange}
-                  placeholder="Articulate what problem you solve, how your product delivers customer value, and why alternatives fall short."
-                  required
-                ></textarea>
+                  placeholder="What fundamental pain point are you solving, what is your unfair advantage or proprietary methodology, and why now?"
+                  className="form-input"
+                  style={{ resize: 'vertical' }}
+                />
               </div>
             </div>
           )}
 
+          {/* Step 2: Economics */}
           {step === 2 && (
-            <div className="animate-fade-in flex flex-col gap-4">
-              <div>
-                <label className="form-label" htmlFor="bInv">Initial Investment Budget (INR ₹ or USD $) *</label>
-                <input
-                  id="bInv"
-                  type="text"
-                  name="investmentAmount"
-                  className="form-input"
-                  value={formData.investmentAmount}
-                  onChange={handleChange}
-                  placeholder="e.g. ₹15,00,000 or $30,000"
-                  required
-                />
+            <div className="animate-fade-in-up">
+              <h3 className="text-lg font-bold mb-1">Market Geography & Target Economics</h3>
+              <p className="text-xs text-light mb-6">Clarify addressable geography, user persona, and budget allocations.</p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="form-group">
+                  <label className="form-label" htmlFor="investmentAmount">
+                    <span>Estimated Budget / Capital ($ or ₹)</span>
+                  </label>
+                  <input
+                    id="investmentAmount"
+                    name="investmentAmount"
+                    type="text"
+                    required
+                    value={formData.investmentAmount}
+                    onChange={handleChange}
+                    placeholder="e.g. $25,000 or ₹20 Lakh"
+                    className="form-input font-mono"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" htmlFor="targetLocation">
+                    <span>Primary Target Region</span>
+                  </label>
+                  <input
+                    id="targetLocation"
+                    name="targetLocation"
+                    type="text"
+                    required
+                    value={formData.targetLocation}
+                    onChange={handleChange}
+                    placeholder="e.g. India (Tier 1 & 2), Southeast Asia"
+                    className="form-input"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="form-label" htmlFor="bLoc">Target Geographic Market *</label>
+              <div className="form-group">
+                <label className="form-label" htmlFor="targetCustomers">
+                  <span>Ideal Customer Profile (ICP)</span>
+                </label>
                 <input
-                  id="bLoc"
-                  type="text"
-                  name="targetLocation"
-                  className="form-input"
-                  value={formData.targetLocation}
-                  onChange={handleChange}
-                  placeholder="e.g. Tier-1 Indian Metros, Pan-India, Global"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="form-label" htmlFor="bCust">Ideal Customer Profile (ICP) *</label>
-                <input
-                  id="bCust"
-                  type="text"
+                  id="targetCustomers"
                   name="targetCustomers"
-                  className="form-input"
+                  type="text"
+                  required
                   value={formData.targetCustomers}
                   onChange={handleChange}
-                  placeholder="e.g. Mid-sized logistics operators, D2C fashion founders"
-                  required
+                  placeholder="e.g. D2C sustainable brands with >$50k monthly GMV"
+                  className="form-input"
                 />
               </div>
             </div>
           )}
 
+          {/* Step 3: Execution */}
           {step === 3 && (
-            <div className="animate-fade-in flex flex-col gap-4">
-              <div>
-                <label className="form-label" htmlFor="bStage">Venture Maturity Stage *</label>
+            <div className="animate-fade-in-up">
+              <h3 className="text-lg font-bold mb-1">Maturity & 12-Month Horizon</h3>
+              <p className="text-xs text-light mb-6">Define current readiness and key targets for precision scoring.</p>
+
+              <div className="form-group">
+                <label className="form-label" htmlFor="businessStage">
+                  <span>Current Venture Stage</span>
+                </label>
                 <select
-                  id="bStage"
+                  id="businessStage"
                   name="businessStage"
-                  className="form-input"
                   value={formData.businessStage}
                   onChange={handleChange}
-                  required
+                  className="form-input"
+                  style={{ cursor: 'pointer' }}
                 >
-                  <option value="idea">Conceptual / Hypothesis Stage</option>
-                  <option value="prototype">Functional Prototype / Working MVP</option>
-                  <option value="revenue">Generating Early Revenue & Traction</option>
+                  <option value="idea">Hypothesis / Concept Stage</option>
+                  <option value="prototype">Working Prototype / Alpha Built</option>
+                  <option value="early-revenue">Beta Testing / First 10 Customers</option>
+                  <option value="scaling">Commercial Traction / Scaling</option>
                 </select>
               </div>
 
-              <div>
-                <label className="form-label" htmlFor="bGoal">Primary 12-Month Objective *</label>
-                <textarea
-                  id="bGoal"
+              <div className="form-group">
+                <label className="form-label" htmlFor="goal12Months">
+                  <span>Primary 12-Month Target Milestone</span>
+                </label>
+                <input
+                  id="goal12Months"
                   name="goal12Months"
-                  className="form-input"
-                  rows="3"
+                  type="text"
                   value={formData.goal12Months}
                   onChange={handleChange}
-                  placeholder="e.g. Validate product-market fit with 50 paying pilot clients and qualify for Startup India seed grants."
-                  required
-                ></textarea>
+                  placeholder="e.g. ₹1 Crore ARR, 50 B2B enterprise pilots, ISO certification"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="p-4 rounded-xl flex items-center gap-3 mt-4" style={{ 
+                backgroundColor: 'rgba(99, 102, 241, 0.06)', 
+                border: '1px solid rgba(99, 102, 241, 0.15)' 
+              }}>
+                <Sparkles size={18} className="text-accent flex-shrink-0" />
+                <span className="text-xs text-secondary leading-relaxed">
+                  Upon submission, the multi-agent diagnostic models your hypothesis against 1,200+ industry benchmarks, active govt grants, and competitive vectors.
+                </span>
               </div>
             </div>
           )}
 
-          {/* Form Actions */}
-          <div className="mt-6 pt-6 border-t flex justify-between items-center" style={{ borderColor: 'var(--border)' }}>
+          {/* Action Navigation */}
+          <div className="flex justify-between items-center mt-8 pt-6 border-t" style={{ borderColor: 'var(--border)' }}>
             {step > 1 ? (
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setStep(step - 1)}
                 className="btn btn-outline flex items-center gap-2"
-                style={{ borderRadius: 'var(--radius-full)', padding: '0.65rem 1.4rem' }}
+                style={{ padding: '0.65rem 1.4rem' }}
               >
-                <ArrowLeft size={16} /> Previous
+                <ArrowLeft size={16} /> Back
               </button>
-            ) : <div></div>}
+            ) : <div />}
 
-            <button 
-              type="submit" 
-              className="btn btn-primary flex items-center gap-2 hover-lift"
-              style={{ borderRadius: 'var(--radius-full)', padding: '0.75rem 2rem', fontWeight: '600' }}
+            <button
+              type="submit"
               disabled={isAnalyzing}
+              className="btn btn-accent flex items-center gap-2 hover-lift"
+              style={{ padding: '0.75rem 2rem', opacity: isAnalyzing ? 0.7 : 1 }}
             >
               {isAnalyzing ? (
                 <>
-                  <Sparkles size={18} className="animate-pulse" /> Synthesizing AI Analysis...
+                  <Loader2 size={18} className="animate-spin" />
+                  Synthesizing Venture Dossier...
                 </>
               ) : step === 3 ? (
                 <>
-                  <Sparkles size={18} /> Run Venture Analysis
+                  Generate Intelligence Dossier <Sparkles size={16} />
                 </>
               ) : (
                 <>
-                  Next Step <ArrowRight size={16} />
+                  Continue <ArrowRight size={16} />
                 </>
               )}
             </button>
           </div>
         </form>
-
-        {/* Completion Result Card */}
-        {analyzedIdea && (
-          <div className="mt-8 pt-8 border-t animate-fade-in-up" style={{ borderColor: 'var(--border)' }}>
-            <div className="p-6 rounded-2xl" style={{ 
-              border: `1.5px solid ${analyzedIdea.isViable !== false ? 'var(--success)' : 'var(--error)'}`,
-              backgroundColor: analyzedIdea.isViable !== false ? 'rgba(16, 185, 129, 0.04)' : 'rgba(239, 68, 68, 0.04)'
-            }}>
-              
-              <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
-                <div className="flex items-center gap-3">
-                  {analyzedIdea.isViable !== false ? (
-                    <CheckCircle size={28} className="text-success" />
-                  ) : (
-                    <ShieldAlert size={28} className="text-error" />
-                  )}
-                  <div>
-                    <h3 className="font-bold text-lg">
-                      {analyzedIdea.isViable !== false ? 'Viable Opportunity Detected' : 'Caution: High Execution Risk'}
-                    </h3>
-                    <p className="text-xs text-light">
-                      {analyzedIdea.businessName} • {analyzedIdea.category?.toUpperCase()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <div className="text-xs font-semibold text-light uppercase">Viability Index</div>
-                  <div className="text-3xl font-extrabold text-primary">{analyzedIdea.aiScore}/100</div>
-                </div>
-              </div>
-
-              <p className="text-sm mb-6" style={{ lineHeight: '1.6', color: 'var(--text-main)' }}>
-                {analyzedIdea.viabilityReason || 'Idea successfully parsed with market feasibility benchmarks and financial forecasts.'}
-              </p>
-
-              {analyzedIdea.breakdown && (
-                <div className="grid grid-cols-3 gap-3 mb-6">
-                  <div className="p-3 rounded-xl bg-white border text-center" style={{ borderColor: 'var(--border)' }}>
-                    <div className="text-xs text-light font-medium">Market Fit</div>
-                    <div className="text-lg font-bold text-primary">{analyzedIdea.breakdown.marketFit}%</div>
-                  </div>
-                  <div className="p-3 rounded-xl bg-white border text-center" style={{ borderColor: 'var(--border)' }}>
-                    <div className="text-xs text-light font-medium">Customer Match</div>
-                    <div className="text-lg font-bold text-primary">{analyzedIdea.breakdown.customerMatch}%</div>
-                  </div>
-                  <div className="p-3 rounded-xl bg-white border text-center" style={{ borderColor: 'var(--border)' }}>
-                    <div className="text-xs text-light font-medium">Financials</div>
-                    <div className="text-lg font-bold text-primary">{analyzedIdea.breakdown.financials}%</div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex flex-wrap gap-3">
-                <button 
-                  className="btn btn-primary flex items-center gap-2 hover-lift"
-                  onClick={() => navigate('/dashboard')}
-                  style={{ borderRadius: 'var(--radius-full)', padding: '0.65rem 1.6rem' }}
-                >
-                  Explore Full Report in Dashboard <ArrowRight size={16} />
-                </button>
-                <button 
-                  className="btn btn-outline" 
-                  onClick={() => { setAnalyzedIdea(null); setFormData(initialFormData); setStep(1); }}
-                  style={{ borderRadius: 'var(--radius-full)', padding: '0.65rem 1.4rem' }}
-                >
-                  Analyze Another Concept
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

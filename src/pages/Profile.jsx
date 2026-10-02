@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import { User, Mail, Briefcase, Award, LogOut, CheckCircle, Save, TrendingUp, BarChart2, Lightbulb } from 'lucide-react';
+import { User, Mail, Briefcase, Award, LogOut, CheckCircle, Save, TrendingUp, BarChart2, Lightbulb, Sparkles, Building, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
@@ -39,7 +39,7 @@ export default function Profile() {
     localStorage.setItem('nexoraUser', JSON.stringify(updated));
     setUser(updated);
     setSavedMsg(true);
-    setTimeout(() => setSavedMsg(false), 3000);
+    setTimeout(() => setSavedMsg(false), 2500);
   };
 
   const handleLogout = () => {
@@ -48,189 +48,144 @@ export default function Profile() {
     navigate('/login');
   };
 
-  return (
-    <div className="flex" style={{ minHeight: 'calc(100vh - 86px)' }}>
-      <Sidebar />
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-      <main className="flex-grow p-8" style={{ backgroundColor: 'var(--bg-color)', overflowY: 'auto' }}>
-        <div className="flex justify-between items-center mb-8 max-w-6xl">
+  return (
+    <div className="flex dashboard-layout" style={{ minHeight: 'calc(100vh - 74px)' }}>
+      <Sidebar isOpen={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} />
+
+      <main className="flex-grow dashboard-main" style={{ backgroundColor: 'var(--bg-color)', overflowY: 'auto', padding: '1.5rem 2rem' }}>
+        <div className="dashboard-mobile-topbar" style={{ marginBottom: '0.5rem' }}>
+          <button className="sidebar-toggle-btn" onClick={() => setMobileSidebarOpen(true)} aria-label="Open menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+          </button>
+          <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-main)' }}>Founder Profile</span>
+        </div>
+        <div className="flex justify-between items-center mb-8 max-w-5xl">
           <div className="flex items-center gap-3">
-            <User size={26} className="text-primary" />
-            <h1 style={{ fontSize: '2rem', letterSpacing: '-0.02em' }}>Founder Profile</h1>
+            <User size={24} className="text-accent" />
+            <h1 style={{ fontSize: '1.85rem', letterSpacing: '-0.03em' }}>Founder Identity & Venture Profile</h1>
           </div>
-          <button 
-            onClick={handleLogout} 
-            className="btn btn-outline flex items-center gap-2 hover-lift"
-            style={{ borderColor: 'var(--border)', color: 'var(--error)', borderRadius: 'var(--radius-full)', padding: '0.45rem 1.2rem', fontSize: '0.85rem' }}
+          <button
+            onClick={handleLogout}
+            className="btn btn-outline text-xs flex items-center gap-1.5"
+            style={{ color: 'var(--error)', borderColor: 'var(--error-border)' }}
           >
-            <LogOut size={15} /> Sign Out
+            <LogOut size={14} /> End Session
           </button>
         </div>
 
         {savedMsg && (
-          <div className="p-4 mb-6 rounded-xl flex items-center gap-2 max-w-6xl" style={{ backgroundColor: '#dcfce7', color: 'var(--success)', border: '1px solid #bbf7d0' }}>
-            <CheckCircle size={18} /> Founder profile updated successfully!
+          <div className="p-4 mb-6 rounded-xl flex items-center gap-2 max-w-5xl" style={{ backgroundColor: 'var(--success-bg)', color: 'var(--success)', border: '1px solid var(--success-border)' }}>
+            <CheckCircle size={18} /> Founder profile updated successfully.
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl">
-          {/* Left Column: ID Card & Stats */}
-          <div className="lg:col-span-1 flex flex-col gap-6">
-            
-            {/* Identity Card */}
-            <div className="card text-center p-8 relative overflow-hidden shadow-sm" style={{ borderRadius: '24px' }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--primary)' }} />
-              
-              <div className="mx-auto mb-4 relative" style={{ width: '90px', height: '90px' }}>
-                <div style={{ 
-                  width: '100%', height: '100%', borderRadius: '50%', backgroundColor: 'var(--bg-secondary)', 
-                  color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                  fontSize: '2.5rem', fontWeight: 'bold', border: '2px solid var(--border)',
-                  boxShadow: 'var(--shadow-sm)'
-                }}>
-                  {name ? name.charAt(0).toUpperCase() : 'U'}
-                </div>
-                <div style={{ position: 'absolute', bottom: '2px', right: '2px', background: 'var(--success)', width: '20px', height: '20px', borderRadius: '50%', border: '3px solid white' }} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-5xl">
+          {/* Profile Overview Card */}
+          <div className="card p-6 flex flex-col items-center text-center justify-between" style={{ borderRadius: '22px' }}>
+            <div className="flex flex-col items-center">
+              <div style={{
+                width: 76,
+                height: 76,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #2563eb, #06b6d4)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#fff',
+                fontSize: '1.8rem',
+                fontWeight: '800',
+                marginBottom: '1rem',
+                boxShadow: '0 8px 20px rgba(37, 99, 235, 0.4)'
+              }}>
+                {name ? name[0].toUpperCase() : 'F'}
               </div>
+              <h3 className="text-lg font-bold text-main">{name}</h3>
+              <span className="text-xs text-light mb-3">{email}</span>
+              <span className="badge badge-primary font-mono text-xs mb-6">VERIFIED FOUNDER</span>
 
-              <h2 className="font-bold text-xl mb-1">{name}</h2>
-              <p className="text-light text-xs mb-4 flex justify-center items-center gap-1.5"><Mail size={13} /> {email}</p>
-              
-              <div className="inline-block px-3.5 py-1 rounded-full mb-2 badge badge-primary font-semibold text-xs">
-                Verified Founder
+              <div className="w-full grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)' }}>
+                  <span className="text-xs text-light block mb-0.5">Dossiers</span>
+                  <span className="text-xl font-bold font-mono text-main">{ideaCount}</span>
+                </div>
+                <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)' }}>
+                  <span className="text-xs text-light block mb-0.5">Saved Grants</span>
+                  <span className="text-xl font-bold font-mono text-success">{savedSchemeCount}</span>
+                </div>
               </div>
-              <div className="text-xs text-light">Unlimited Diagnostic Runs</div>
             </div>
 
-            {/* Platform Stats */}
-            <div className="card p-6 shadow-sm" style={{ borderRadius: '22px' }}>
-              <h3 className="font-bold mb-4 flex items-center gap-2 text-xs text-light uppercase tracking-wider">
-                <BarChart2 size={15} /> Platform Activity
-              </h3>
-              
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between p-3 rounded-xl" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-blue-50 text-primary"><Lightbulb size={17} /></div>
-                    <div>
-                      <div className="font-bold text-sm">Ideas Analyzed</div>
-                      <div className="text-xs text-light">Lifetime tests</div>
-                    </div>
-                  </div>
-                  <div className="font-extrabold text-lg">{ideaCount}</div>
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-xl" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-green-50 text-success"><TrendingUp size={17} /></div>
-                    <div>
-                      <div className="font-bold text-sm">Mean Viability</div>
-                      <div className="text-xs text-light">Across concepts</div>
-                    </div>
-                  </div>
-                  <div className="font-extrabold text-lg text-success">84%</div>
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-xl" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-purple-50 text-secondary"><Award size={17} /></div>
-                    <div>
-                      <div className="font-bold text-sm">Saved Schemes</div>
-                      <div className="text-xs text-light">Tracked grants</div>
-                    </div>
-                  </div>
-                  <div className="font-extrabold text-lg">{savedSchemeCount}</div>
-                </div>
-              </div>
+            <div className="w-full pt-6 mt-6 border-t" style={{ borderColor: 'var(--border)' }}>
+              <span className="text-xs text-light flex items-center justify-center gap-1.5 font-mono">
+                <Sparkles size={13} className="text-accent" /> TIER: PRO STUDIO
+              </span>
             </div>
           </div>
 
-          {/* Right Column: Settings Form */}
-          <div className="lg:col-span-2">
-            <div className="card p-8 h-full shadow-sm" style={{ borderRadius: '24px' }}>
-              <h2 className="mb-6 font-bold flex items-center gap-3 border-b pb-4 text-xl" style={{ borderColor: 'var(--border)' }}>
-                <Briefcase size={22} className="text-primary" /> Professional Details
-              </h2>
+          {/* Edit Profile Form */}
+          <div className="card p-6 lg:col-span-2" style={{ borderRadius: '22px' }}>
+            <h3 className="font-bold text-base mb-1">Founder Details</h3>
+            <p className="text-xs text-light mb-6">Manage personal information and primary venture entity.</p>
 
-              <form onSubmit={handleSaveProfile} className="flex flex-col gap-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div>
-                    <label className="form-label" htmlFor="fullNameInput">Full Name</label>
-                    <input
-                      id="fullNameInput"
-                      type="text"
-                      className="form-input"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="form-label" htmlFor="emailAddressInput">Email Address</label>
-                    <input
-                      id="emailAddressInput"
-                      type="email"
-                      className="form-input"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
+            <form onSubmit={handleSaveProfile}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div className="form-group mb-0">
+                  <label className="form-label" htmlFor="name"><span>Full Name</span></label>
+                  <input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="form-input"
+                  />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div>
-                    <label className="form-label" htmlFor="startupCompanyInput">Current Venture / Organization</label>
-                    <input
-                      id="startupCompanyInput"
-                      type="text"
-                      className="form-input"
-                      value={company}
-                      onChange={(e) => setCompany(e.target.value)}
-                    />
-                  </div>
+                <div className="form-group mb-0">
+                  <label className="form-label" htmlFor="email"><span>Email</span></label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+              </div>
 
-                  <div>
-                    <label className="form-label" htmlFor="industrySectorInput">Domain Focus</label>
-                    <select
-                      id="industrySectorInput"
-                      className="form-input"
-                      value={industry}
-                      onChange={(e) => setIndustry(e.target.value)}
-                    >
-                      <option value="SaaS / Software">SaaS & Enterprise Software</option>
-                      <option value="E-Commerce / D2C">E-Commerce & D2C Brands</option>
-                      <option value="HealthTech">HealthTech & Life Sciences</option>
-                      <option value="EdTech">EdTech & Continuous Learning</option>
-                      <option value="FinTech">FinTech & Web3</option>
-                      <option value="CleanTech / Sustainability">CleanTech & Sustainability</option>
-                      <option value="AI / Machine Learning">AI & Automation</option>
-                      <option value="Other">Other / Multi-Sector</option>
-                    </select>
-                  </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div className="form-group mb-0">
+                  <label className="form-label" htmlFor="company"><span>Primary Venture / Company</span></label>
+                  <input
+                    id="company"
+                    type="text"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    className="form-input"
+                  />
                 </div>
 
-                <div>
-                  <label className="form-label">Founder Bio / Objectives</label>
-                  <textarea 
-                    className="form-input" 
-                    rows="4" 
-                    placeholder="Briefly describe your venture focus, background, or current fundraising milestones..."
-                  ></textarea>
+                <div className="form-group mb-0">
+                  <label className="form-label" htmlFor="industry"><span>Primary Industry Domain</span></label>
+                  <input
+                    id="industry"
+                    type="text"
+                    value={industry}
+                    onChange={(e) => setIndustry(e.target.value)}
+                    className="form-input"
+                  />
                 </div>
+              </div>
 
-                <div className="pt-5 border-t flex justify-end" style={{ borderColor: 'var(--border)' }}>
-                  <button 
-                    type="submit" 
-                    className="btn btn-primary flex items-center gap-2 hover-lift"
-                    style={{ borderRadius: 'var(--radius-full)', padding: '0.75rem 2rem', fontWeight: '600' }}
-                  >
-                    <Save size={17} /> Save Changes
-                  </button>
-                </div>
-              </form>
-            </div>
+              <button
+                type="submit"
+                className="btn btn-accent flex items-center gap-2 hover-lift"
+                style={{ padding: '0.65rem 1.6rem', borderRadius: 'var(--radius-md)' }}
+              >
+                <Save size={16} /> Update Profile
+              </button>
+            </form>
           </div>
         </div>
       </main>

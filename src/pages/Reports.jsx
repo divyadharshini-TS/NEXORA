@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileBarChart, TrendingUp, Award, Layers, ArrowRight, BarChart3, CheckCircle2 } from 'lucide-react';
+import { 
+  FileBarChart, TrendingUp, Award, Layers, ArrowRight, BarChart3, 
+  CheckCircle2, Sparkles, FolderOpen, Target
+} from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 
 export default function Reports() {
@@ -8,6 +11,7 @@ export default function Reports() {
   const [summary, setSummary] = useState({ total: 0, avgScore: 0, recent: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -20,11 +24,9 @@ export default function Reports() {
           const data = await res.json();
           setSummary(data || { total: 0, avgScore: 0, recent: [] });
         } else {
-          // Local fallback from user history
           loadLocalSummary();
         }
       } catch (err) {
-        console.warn(err);
         loadLocalSummary();
       } finally {
         setLoading(false);
@@ -43,7 +45,15 @@ export default function Reports() {
           return;
         }
       } catch {}
-      setSummary({ total: 3, avgScore: 82, recent: [] });
+      setSummary({ 
+        total: 3, 
+        avgScore: 84, 
+        recent: [
+          { businessName: 'EcoBox Packaging', category: 'ecommerce', aiScore: 84, targetLocation: 'India' },
+          { businessName: 'AgroPulse Sensor AI', category: 'agritech', aiScore: 91, targetLocation: 'India' },
+          { businessName: 'MediRoute Logistics', category: 'healthtech', aiScore: 78, targetLocation: 'Global' }
+        ] 
+      });
     };
 
     load();
@@ -55,116 +65,104 @@ export default function Reports() {
   };
 
   return (
-    <div className="flex" style={{ minHeight: 'calc(100vh - 86px)' }}>
-      <Sidebar />
+    <div className="flex dashboard-layout" style={{ minHeight: 'calc(100vh - 74px)' }}>
+      <Sidebar isOpen={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} />
 
-      <main className="flex-grow p-8" style={{ backgroundColor: 'var(--bg-color)', overflowY: 'auto' }}>
+      <main className="flex-grow dashboard-main" style={{ backgroundColor: 'var(--bg-color)', overflowY: 'auto', padding: '1.5rem 2rem' }}>
+        {/* Mobile topbar */}
+        <div className="dashboard-mobile-topbar" style={{ marginBottom: '0.5rem' }}>
+          <button className="sidebar-toggle-btn" onClick={() => setMobileSidebarOpen(true)} aria-label="Open menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+          </button>
+          <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-main)' }}>Portfolio Analytics</span>
+        </div>
         <div className="mb-8 max-w-5xl">
           <div className="flex items-center gap-3 mb-1">
-            <FileBarChart size={26} className="text-primary" />
-            <h1 style={{ fontSize: '2rem', letterSpacing: '-0.02em' }}>Intelligence Analytics</h1>
+            <FileBarChart size={24} className="text-accent" />
+            <h1 style={{ fontSize: '1.85rem', letterSpacing: '-0.03em' }}>Portfolio & Intelligence Analytics</h1>
           </div>
           <p className="text-light text-sm">
-            High-level performance metrics, viability distribution, and recent diagnostic evaluations.
+            Aggregated diagnostics, sector distribution, and historical viability performance.
           </p>
         </div>
 
         {loading ? (
-          <div className="text-light p-12 text-center">Synthesizing intelligence summaries...</div>
-        ) : error && summary.total === 0 ? (
-          <div className="card p-8 text-center max-w-lg mx-auto" style={{ borderRadius: '20px' }}>
-            <h3>{error}</h3>
-          </div>
+          <div className="text-light p-12 text-center text-sm">Synthesizing intelligence summaries...</div>
         ) : (
           <div className="grid grid-cols-1 gap-8 max-w-5xl">
-            {/* Top Metric Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div className="card p-6 flex items-center gap-4 hover-lift" style={{ borderRadius: '20px' }}>
-                <div style={{ 
-                  width: '52px', height: '52px', borderRadius: '14px', 
-                  backgroundColor: 'rgba(15, 23, 42, 0.05)', color: 'var(--primary)', 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center' 
-                }}>
-                  <Layers size={24} />
-                </div>
-                <div>
-                  <div className="text-xs text-light font-semibold uppercase tracking-wider">Concepts Evaluated</div>
-                  <div className="font-extrabold text-2xl text-primary mt-0.5">{summary.total || 1}</div>
-                </div>
+            
+            {/* Top Stat Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              <div className="card p-6" style={{ borderRadius: '20px' }}>
+                <span className="text-xs text-light font-semibold uppercase tracking-wider block mb-1">Evaluated Hypotheses</span>
+                <div className="text-3xl font-extrabold font-mono text-main mb-1">{summary.total || 3}</div>
+                <span className="text-xs text-success flex items-center gap-1">
+                  <CheckCircle2 size={13} /> Active Portfolio
+                </span>
               </div>
 
-              <div className="card p-6 flex items-center gap-4 hover-lift" style={{ borderRadius: '20px' }}>
-                <div style={{ 
-                  width: '52px', height: '52px', borderRadius: '14px', 
-                  backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center' 
-                }}>
-                  <Award size={24} />
-                </div>
-                <div>
-                  <div className="text-xs text-light font-semibold uppercase tracking-wider">Mean Viability Index</div>
-                  <div className="font-extrabold text-2xl text-success mt-0.5">{summary.avgScore || 84}<span style={{ fontSize: '0.9rem', color: 'var(--text-light)', fontWeight: 'normal' }}>/100</span></div>
-                </div>
+              <div className="card p-6" style={{ borderRadius: '20px' }}>
+                <span className="text-xs text-light font-semibold uppercase tracking-wider block mb-1">Average Viability Score</span>
+                <div className="text-3xl font-extrabold font-mono text-accent mb-1">{summary.avgScore || 84}/100</div>
+                <span className="text-xs text-light">Algorithmic mean across all tests</span>
               </div>
 
-              <div className="card p-6 flex items-center gap-4 hover-lift" style={{ borderRadius: '20px' }}>
-                <div style={{ 
-                  width: '52px', height: '52px', borderRadius: '14px', 
-                  backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--secondary)', 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center' 
-                }}>
-                  <TrendingUp size={24} />
-                </div>
-                <div>
-                  <div className="text-xs text-light font-semibold uppercase tracking-wider">Grant Qualification</div>
-                  <div className="font-extrabold text-2xl text-secondary mt-0.5">High Potential</div>
-                </div>
+              <div className="card p-6" style={{ borderRadius: '20px' }}>
+                <span className="text-xs text-light font-semibold uppercase tracking-wider block mb-1">Govt Schemes Match Rate</span>
+                <div className="text-3xl font-extrabold font-mono text-success mb-1">100%</div>
+                <span className="text-xs text-success flex items-center gap-1">
+                  <Award size={13} /> Non-dilutive eligible
+                </span>
               </div>
             </div>
 
-            {/* Recent Analysis Table/Card */}
-            <div className="card p-7 shadow-sm" style={{ borderRadius: '22px' }}>
-              <div className="flex justify-between items-center mb-5 pb-4 border-b" style={{ borderColor: 'var(--border)' }}>
+            {/* Recent Evaluations Table */}
+            <div className="card p-6" style={{ borderRadius: '22px' }}>
+              <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h3 className="font-bold text-lg">Evaluation Log</h3>
-                  <p className="text-light text-xs">Direct access to comprehensive feasibility reports</p>
+                  <h3 className="font-bold text-base">Recent Venture Dossiers</h3>
+                  <p className="text-xs text-light">Click any venture to load its full diagnostic memo</p>
                 </div>
               </div>
 
-              {summary.recent && summary.recent.length === 0 ? (
-                <div className="p-8 text-center text-light text-sm">
-                  No previous reports on file. Submit an idea in New Analysis to generate your initial dossier!
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  {(summary.recent || []).map((r, i) => (
-                    <div 
-                      key={i} 
-                      onClick={() => openReport(r)}
-                      className="p-4 rounded-xl flex items-center justify-between hover-lift cursor-pointer transition-all"
-                      style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
-                    >
-                      <div>
-                        <div className="font-bold text-base text-primary mb-0.5">{r.businessName || 'Venture Concept'}</div>
-                        <div className="text-xs text-light">
-                          {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently parsed'}
-                          {r.category && ` • ${r.category.toUpperCase()}`}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <span className="badge badge-success font-bold text-xs">
-                            Score: {r.aiScore || 80}/100
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-light)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      <th className="pb-3 font-semibold">Venture Hypothesis</th>
+                      <th className="pb-3 font-semibold">Sector</th>
+                      <th className="pb-3 font-semibold">Viability Score</th>
+                      <th className="pb-3 font-semibold">Region</th>
+                      <th className="pb-3 font-semibold text-right">Dossier Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(summary.recent || []).map((rec, i) => (
+                      <tr key={i} style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.15s ease' }}>
+                        <td className="py-4 font-bold text-sm text-main">{rec.businessName}</td>
+                        <td className="py-4 text-xs font-mono uppercase text-light">{rec.category || 'General'}</td>
+                        <td className="py-4">
+                          <span className="badge badge-success font-mono text-xs">
+                            {rec.aiScore || 80}/100
                           </span>
-                        </div>
-                        <ArrowRight size={16} className="text-light" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                        </td>
+                        <td className="py-4 text-xs text-light">{rec.targetLocation || 'India'}</td>
+                        <td className="py-4 text-right">
+                          <button
+                            onClick={() => openReport(rec)}
+                            className="btn btn-outline text-xs"
+                            style={{ padding: '0.35rem 0.85rem' }}
+                          >
+                            Examine Dossier &rarr;
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
+
           </div>
         )}
       </main>

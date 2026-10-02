@@ -26,119 +26,136 @@ export default function Settings() {
     localStorage.setItem('reportNotify', JSON.stringify(reportNotify));
     
     setSavedStatus(true);
-    setTimeout(() => setSavedStatus(false), 3000);
+    setTimeout(() => setSavedStatus(false), 2500);
   };
 
-  return (
-    <div className="flex" style={{ minHeight: 'calc(100vh - 86px)' }}>
-      <Sidebar />
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-      <main className="flex-grow p-8" style={{ backgroundColor: 'var(--bg-color)', overflowY: 'auto' }}>
+  return (
+    <div className="flex dashboard-layout" style={{ minHeight: 'calc(100vh - 74px)' }}>
+      <Sidebar isOpen={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} />
+
+      <main className="flex-grow dashboard-main" style={{ backgroundColor: 'var(--bg-color)', overflowY: 'auto', padding: '1.5rem 2rem' }}>
+        <div className="dashboard-mobile-topbar" style={{ marginBottom: '0.5rem' }}>
+          <button className="sidebar-toggle-btn" onClick={() => setMobileSidebarOpen(true)} aria-label="Open menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+          </button>
+          <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-main)' }}>Settings</span>
+        </div>
         <div className="mb-8 max-w-3xl">
           <div className="flex items-center gap-3 mb-1">
-            <SettingsIcon size={26} className="text-primary" />
-            <h1 style={{ fontSize: '2rem', letterSpacing: '-0.02em' }}>Workspace Settings</h1>
+            <SettingsIcon size={24} className="text-accent" />
+            <h1 style={{ fontSize: '1.85rem', letterSpacing: '-0.03em' }}>Workspace Settings</h1>
           </div>
           <p className="text-light text-sm">
-            Manage your interface appearance, custom API integrations, and notification preferences.
+            Configure visual themes, custom AI keys, and automated report notifications.
           </p>
         </div>
 
         {savedStatus && (
-          <div className="p-4 mb-6 rounded-xl flex items-center gap-2 max-w-3xl" style={{ backgroundColor: '#dcfce7', color: 'var(--success)', border: '1px solid #bbf7d0' }}>
-            <Check size={18} /> Settings successfully updated!
+          <div className="p-4 mb-6 rounded-xl flex items-center gap-2 max-w-3xl" style={{ backgroundColor: 'var(--success-bg)', color: 'var(--success)', border: '1px solid var(--success-border)' }}>
+            <Check size={18} /> Settings successfully preserved across workspace.
           </div>
         )}
 
         <form onSubmit={handleSave} className="grid grid-cols-1 gap-6 max-w-3xl">
           {/* Appearance */}
-          <div className="card p-7 hover-lift" style={{ borderRadius: '22px' }}>
-            <h3 className="mb-2 flex items-center gap-2 text-lg font-bold">
-              {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />} Interface Theme
+          <div className="card p-6" style={{ borderRadius: '22px' }}>
+            <h3 className="mb-1 text-base font-bold flex items-center gap-2">
+              {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />} Theme & Appearance
             </h3>
             <p className="text-light text-xs mb-4">Choose your preferred lighting mode for the NEXORA console.</p>
-            <div className="flex gap-4">
+            
+            <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
                 onClick={() => setTheme('light')}
-                className={`btn ${theme === 'light' ? 'btn-primary' : 'btn-outline'} flex items-center gap-2`}
-                style={{ borderRadius: 'var(--radius-full)', padding: '0.6rem 1.4rem' }}
+                className="p-4 rounded-xl flex items-center gap-3 text-left transition-all"
+                style={{
+                  backgroundColor: theme === 'light' ? 'var(--bg-subtle)' : 'transparent',
+                  border: theme === 'light' ? '2px solid var(--accent)' : '1px solid var(--border)'
+                }}
               >
-                <Sun size={17} /> Light Mode
+                <Sun size={20} className={theme === 'light' ? 'text-accent' : 'text-light'} />
+                <div>
+                  <div className="font-bold text-xs text-main">Studio Light</div>
+                  <div className="text-xs text-light" style={{ fontSize: '0.72rem' }}>Clean obsidian contrast</div>
+                </div>
               </button>
+
               <button
                 type="button"
                 onClick={() => setTheme('dark')}
-                className={`btn ${theme === 'dark' ? 'btn-primary' : 'btn-outline'} flex items-center gap-2`}
-                style={{ borderRadius: 'var(--radius-full)', padding: '0.6rem 1.4rem' }}
+                className="p-4 rounded-xl flex items-center gap-3 text-left transition-all"
+                style={{
+                  backgroundColor: theme === 'dark' ? 'var(--bg-subtle)' : 'transparent',
+                  border: theme === 'dark' ? '2px solid var(--accent)' : '1px solid var(--border)'
+                }}
               >
-                <Moon size={17} /> Dark Mode
+                <Moon size={20} className={theme === 'dark' ? 'text-accent' : 'text-light'} />
+                <div>
+                  <div className="font-bold text-xs text-main">Cyber Slate</div>
+                  <div className="text-xs text-light" style={{ fontSize: '0.72rem' }}>High-contrast dark mode</div>
+                </div>
               </button>
             </div>
           </div>
 
-          {/* AI Credentials */}
-          <div className="card p-7 hover-lift" style={{ borderRadius: '22px' }}>
-            <h3 className="mb-2 flex items-center gap-2 text-lg font-bold">
-              <Key size={20} className="text-primary" /> Gemini AI Integration
+          {/* AI Model Credentials */}
+          <div className="card p-6" style={{ borderRadius: '22px' }}>
+            <h3 className="mb-1 text-base font-bold flex items-center gap-2">
+              <Key size={18} className="text-accent" /> Custom Gemini API Key (Optional)
             </h3>
             <p className="text-light text-xs mb-4">
-              Provide your dedicated Google AI Studio API key to bypass shared rate limits.
+              Override the built-in system quota with your personal Gemini 2.5/3.0 API key for unlimited analysis.
             </p>
-            <div>
-              <label className="form-label" htmlFor="apiKeyInput">Gemini API Key</label>
-              <input
-                id="apiKeyInput"
-                type="password"
-                className="form-input"
-                placeholder="AIzaSy..."
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-              />
-              <span className="text-xs text-light mt-1.5 block">Stored securely inside your local browser storage.</span>
-            </div>
+            <input
+              type="password"
+              placeholder="AIzaSy..."
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              className="form-input font-mono text-xs"
+              style={{ padding: '0.75rem 1rem' }}
+            />
           </div>
 
           {/* Notifications */}
-          <div className="card p-7 hover-lift" style={{ borderRadius: '22px' }}>
-            <h3 className="mb-2 flex items-center gap-2 text-lg font-bold">
-              <Bell size={20} className="text-primary" /> Notification Alerts
+          <div className="card p-6" style={{ borderRadius: '22px' }}>
+            <h3 className="mb-1 text-base font-bold flex items-center gap-2">
+              <Bell size={18} className="text-accent" /> Notification Dispatch
             </h3>
-            <p className="text-light text-xs mb-4">Control what automated updates you receive.</p>
+            <p className="text-light text-xs mb-4">Select event triggers for automated email and dashboard alerts.</p>
+            
             <div className="flex flex-col gap-3">
-              <label className="flex items-center gap-3 cursor-pointer text-sm">
-                <input 
-                  type="checkbox" 
-                  className="visually-hidden" 
-                  checked={emailAlerts} 
-                  onChange={(e) => setEmailAlerts(e.target.checked)} 
+              <label className="flex items-center gap-3 text-xs font-semibold text-main cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={emailAlerts}
+                  onChange={(e) => setEmailAlerts(e.target.checked)}
+                  style={{ accentColor: 'var(--accent)', width: 16, height: 16 }}
                 />
-                {emailAlerts ? <CheckSquare size={18} className="text-primary" /> : <Square size={18} className="text-light" />}
-                <span className="font-medium">Government Scheme deadline alerts and funding opportunities</span>
+                <span>Email me when matching government grant rounds open</span>
               </label>
 
-              <label className="flex items-center gap-3 cursor-pointer text-sm">
-                <input 
-                  type="checkbox" 
-                  className="visually-hidden" 
-                  checked={reportNotify} 
-                  onChange={(e) => setReportNotify(e.target.checked)} 
+              <label className="flex items-center gap-3 text-xs font-semibold text-main cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={reportNotify}
+                  onChange={(e) => setReportNotify(e.target.checked)}
+                  style={{ accentColor: 'var(--accent)', width: 16, height: 16 }}
                 />
-                {reportNotify ? <CheckSquare size={18} className="text-primary" /> : <Square size={18} className="text-light" />}
-                <span className="font-medium">AI analysis diagnostic completion notifications</span>
+                <span>Notify upon completion of long-running financial simulation models</span>
               </label>
             </div>
           </div>
 
-          <div>
-            <button 
-              type="submit" 
-              className="btn btn-primary flex items-center gap-2 hover-lift"
-              style={{ borderRadius: 'var(--radius-full)', padding: '0.75rem 2.25rem', fontWeight: '600' }}
-            >
-              <Save size={18} /> Save Workspace Settings
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="btn btn-accent flex items-center justify-center gap-2 hover-lift"
+            style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)' }}
+          >
+            <Save size={16} /> Save Workspace Configuration
+          </button>
         </form>
       </main>
     </div>

@@ -7,12 +7,10 @@ import { DEFAULT_SCHEMES } from '../data/defaultSchemes';
 export default function SavedSchemes() {
   const [schemes, setSchemes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      setError('');
       try {
         const token = localStorage.getItem('nexoraToken');
         const res = await fetch('/api/schemes/saved', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
@@ -45,88 +43,78 @@ export default function SavedSchemes() {
     load();
   }, []);
 
-  return (
-    <div className="flex" style={{ minHeight: 'calc(100vh - 86px)' }}>
-      <Sidebar />
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-      <main className="flex-grow p-8" style={{ backgroundColor: 'var(--bg-color)', overflowY: 'auto' }}>
+  return (
+    <div className="flex dashboard-layout" style={{ minHeight: 'calc(100vh - 74px)' }}>
+      <Sidebar isOpen={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} />
+
+      <main className="flex-grow dashboard-main" style={{ backgroundColor: 'var(--bg-color)', overflowY: 'auto', padding: '1.5rem 2rem' }}>
+        <div className="dashboard-mobile-topbar" style={{ marginBottom: '0.5rem' }}>
+          <button className="sidebar-toggle-btn" onClick={() => setMobileSidebarOpen(true)} aria-label="Open menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+          </button>
+          <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-main)' }}>Saved Schemes</span>
+        </div>
         <div className="flex flex-wrap justify-between items-center mb-8 gap-4 max-w-5xl">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <BookmarkCheck size={26} className="text-primary" />
-              <h1 style={{ fontSize: '2rem', letterSpacing: '-0.02em' }}>Bookmarked Schemes</h1>
-              <span className="badge badge-primary">{schemes.length} Saved</span>
+              <BookmarkCheck size={24} className="text-accent" />
+              <h1 style={{ fontSize: '1.85rem', letterSpacing: '-0.03em' }}>Bookmarked Schemes</h1>
+              <span className="badge badge-primary font-mono text-xs">{schemes.length} Saved</span>
             </div>
             <p className="text-light text-sm">
-              Government grants and financial facilities saved for active application tracking.
+              Shortlisted non-dilutive grants, seed funds, and subsidized credit facilities.
             </p>
           </div>
 
           <Link 
             to="/schemes" 
-            className="btn btn-primary flex items-center gap-2 hover-lift"
-            style={{ borderRadius: 'var(--radius-full)', padding: '0.65rem 1.4rem' }}
+            className="btn btn-outline text-xs flex items-center gap-2"
+            style={{ borderRadius: 'var(--radius-full)', padding: '0.6rem 1.25rem' }}
           >
-            Explore Directory <ArrowRight size={16} />
+            Explore Directory &rarr;
           </Link>
         </div>
 
         {loading ? (
-          <div className="text-light p-12 text-center">Loading your saved schemes...</div>
-        ) : error && schemes.length === 0 ? (
-          <div className="card p-8 text-center max-w-md mx-auto" style={{ borderRadius: '20px' }}>
-            <h3>{error}</h3>
-          </div>
-        ) : schemes.length === 0 ? (
-          <div className="card p-10 text-center max-w-lg mx-auto" style={{ borderRadius: '24px' }}>
-            <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
-              <Landmark size={26} className="text-light" />
-            </div>
-            <h3 className="mb-2 text-xl font-bold">No Saved Schemes Yet</h3>
-            <p className="text-light text-sm mb-6">Browse the government grant scheme directory and bookmark the ones relevant to your venture.</p>
-            <Link to="/schemes" className="btn btn-primary" style={{ borderRadius: 'var(--radius-full)', padding: '0.75rem 2rem' }}>
-              Browse Schemes Catalog
-            </Link>
-          </div>
+          <div className="text-light p-12 text-center text-sm">Loading bookmarked schemes...</div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 max-w-5xl">
-            {schemes.map((s) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl">
+            {schemes.map((scheme, idx) => (
               <div 
-                key={s._id || s.id || s.name} 
-                className="card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover-lift"
-                style={{ borderRadius: '20px', border: '1px solid var(--border)' }}
+                key={idx} 
+                className="card p-6 flex flex-col justify-between hover-lift" 
+                style={{ borderRadius: '22px' }}
               >
-                <div className="flex-grow">
-                  <div className="flex items-center gap-2.5 mb-1.5">
-                    <h3 className="font-bold text-lg">{s.name}</h3>
-                    <span className="badge badge-success text-xs font-semibold">
-                      {s.fundingAmount || 'Grant Eligible'}
+                <div>
+                  <div className="flex justify-between items-start gap-2 mb-3">
+                    <h3 className="text-base font-bold text-main leading-snug">{scheme.name}</h3>
+                    <span className="badge badge-success font-mono text-xs flex-shrink-0">
+                      {scheme.fundingAmount}
                     </span>
                   </div>
-                  <p className="text-sm text-light max-w-2xl mb-2" style={{ lineHeight: '1.6' }}>
-                    {s.description || s.eligibility || s.note}
+
+                  <p className="text-xs text-light line-clamp-3 mb-4 leading-relaxed">
+                    {scheme.description}
                   </p>
-                  {s.eligibility && (
-                    <div className="text-xs text-light">
-                      <span className="font-semibold text-primary">Prerequisites: </span>
-                      {s.eligibility}
-                    </div>
-                  )}
+
+                  <div className="p-3 rounded-xl mb-4" style={{ backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)' }}>
+                    <span className="text-xs text-secondary font-medium block">
+                      <strong>Eligibility:</strong> {scheme.eligibility}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3 w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0" style={{ borderColor: 'var(--border)' }}>
-                  {s.officialLink && (
-                    <a 
-                      className="btn btn-primary flex items-center gap-1.5 hover-lift" 
-                      href={s.officialLink} 
-                      target="_blank" 
-                      rel="noreferrer"
-                      style={{ fontSize: '0.85rem', padding: '0.55rem 1.25rem', borderRadius: 'var(--radius-full)' }}
-                    >
-                      Official Portal <ExternalLink size={13} />
-                    </a>
-                  )}
-                </div>
+                <a
+                  href={scheme.applicationUrl || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary text-xs w-full justify-center flex items-center gap-1.5"
+                  style={{ padding: '0.55rem' }}
+                >
+                  Visit Official Application <ExternalLink size={13} />
+                </a>
               </div>
             ))}
           </div>

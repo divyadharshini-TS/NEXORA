@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, Link } from 'react-router-dom';
 import { 
-  LayoutDashboard, FolderOpen, FileBarChart, Landmark, Settings, User, Bell, Rocket, PlusCircle
+  LayoutDashboard, FolderOpen, FileBarChart, Landmark, Settings, 
+  User, Bell, PlusCircle, Sparkles, ChevronRight, ShieldCheck, X
 } from 'lucide-react';
 
-export default function Sidebar({ isDemo = false }) {
+export default function Sidebar({ isDemo = false, isOpen = false, onClose = () => {} }) {
   const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(2);
 
   useEffect(() => {
-    // Fetch unread count from notifications if logged in
     const fetchNotes = async () => {
       try {
         const token = localStorage.getItem('nexoraToken');
@@ -20,7 +20,8 @@ export default function Sidebar({ isDemo = false }) {
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data)) {
-            setUnreadCount(data.length);
+            const unread = data.filter(n => n.unread !== false).length;
+            setUnreadCount(unread || data.length);
           }
         }
       } catch (e) {
@@ -30,136 +31,235 @@ export default function Sidebar({ isDemo = false }) {
     fetchNotes();
   }, []);
 
+  // Auto-close mobile drawer on route navigation
+  useEffect(() => {
+    if (onClose) onClose();
+  }, [location.pathname]);
+
+  // Lock body scroll when sidebar is open on mobile
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('sidebar-lock');
+    } else {
+      document.body.classList.remove('sidebar-lock');
+    }
+    return () => document.body.classList.remove('sidebar-lock');
+  }, [isOpen]);
+
   const navItems = [
-    {
-      to: isDemo ? '/demo' : '/dashboard',
-      label: isDemo ? 'Demo Dashboard' : 'Dashboard',
-      icon: LayoutDashboard,
-    },
-    {
-      to: '/my-ideas',
-      label: 'My Ideas',
-      icon: FolderOpen,
-    },
-    {
-      to: '/reports',
-      label: 'Reports',
-      icon: FileBarChart,
-    },
-    {
-      to: '/saved-schemes',
-      label: 'Saved Schemes',
-      icon: Landmark,
-    },
-    {
-      to: '/settings',
-      label: 'Settings',
-      icon: Settings,
-    },
-    {
-      to: '/profile',
-      label: 'Profile',
-      icon: User,
-    },
+    { to: isDemo ? '/demo' : '/dashboard', label: isDemo ? 'Benchmark Dossier' : 'Executive Dashboard', icon: LayoutDashboard },
+    { to: '/my-ideas',      label: 'Venture Library',     icon: FolderOpen   },
+    { to: '/reports',       label: 'Portfolio Analytics', icon: FileBarChart },
+    { to: '/saved-schemes', label: 'Saved Schemes',       icon: Landmark     },
+    { to: '/notifications', label: 'Alerts & Updates',    icon: Bell, badge: unreadCount > 0 ? unreadCount : null },
   ];
 
+  const bottomItems = [
+    { to: '/settings', label: 'Settings', icon: Settings },
+    { to: '/profile',  label: 'Founder Profile',  icon: User     },
+  ];
+
+  const NavItem = ({ item }) => {
+    const Icon = item.icon;
+    const isActive = location.pathname === item.to;
+    return (
+      <NavLink
+        to={item.to}
+        onClick={() => { if (onClose) onClose(); }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '10px 14px',
+          borderRadius: '12px',
+          textDecoration: 'none',
+          fontWeight: isActive ? '600' : '500',
+          fontSize: '0.88rem',
+          letterSpacing: '-0.01em',
+          color: isActive ? 'var(--text-main)' : 'var(--text-light)',
+          backgroundColor: isActive ? 'var(--bg-subtle)' : 'transparent',
+          border: isActive ? '1px solid var(--border)' : '1px solid transparent',
+          transition: 'all 0.16s ease',
+          marginBottom: '3px',
+          position: 'relative'
+        }}
+        onMouseEnter={e => {
+          if (!isActive) {
+            e.currentTarget.style.backgroundColor = 'var(--bg-subtle)';
+            e.currentTarget.style.color = 'var(--text-main)';
+          }
+        }}
+        onMouseLeave={e => {
+          if (!isActive) {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = 'var(--text-light)';
+          }
+        }}
+      >
+        <span style={{
+          width: '32px',
+          height: '32px',
+          borderRadius: '9px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: isActive ? 'var(--primary)' : 'var(--bg-subtle)',
+          color: isActive ? 'var(--bg-color)' : 'var(--text-light)',
+          flexShrink: 0,
+          transition: 'all 0.16s ease',
+          boxShadow: isActive ? '0 2px 8px rgba(10, 15, 29, 0.15)' : 'none'
+        }}>
+          <Icon size={16} />
+        </span>
+        <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>
+
+        {item.badge && (
+          <span style={{
+            marginLeft: 'auto',
+            background: 'var(--accent)',
+            color: '#fff',
+            fontSize: '0.68rem',
+            fontWeight: '700',
+            padding: '1px 6px',
+            borderRadius: '999px',
+            lineHeight: 1.4
+          }}>
+            {item.badge}
+          </span>
+        )}
+
+        {isActive && !item.badge && (
+          <span style={{
+            marginLeft: 'auto',
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            backgroundColor: 'var(--accent)',
+            flexShrink: 0,
+            boxShadow: '0 0 8px var(--accent)'
+          }} />
+        )}
+      </NavLink>
+    );
+  };
+
   return (
-    <aside style={{ 
-      width: '300px', 
-      minWidth: '300px',
-      backgroundColor: 'var(--white)', 
-      borderRight: '1px solid var(--border)', 
-      padding: '2.5rem 1.75rem', 
-      display: 'flex', 
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      position: 'sticky',
-      top: '86px',
-      height: 'calc(100vh - 86px)',
-      overflowY: 'auto'
-    }}>
-      <div className="flex flex-col gap-7">
-        <NavLink 
-          to="/analyze" 
-          className="btn btn-primary w-full flex items-center justify-center gap-2.5"
-          style={{ 
-            textDecoration: 'none', 
-            padding: '0.85rem 1.25rem', 
-            fontSize: '0.95rem', 
-            fontWeight: '600',
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: 'var(--shadow-sm)'
+    <>
+      {/* Mobile Backdrop overlay */}
+      {isOpen && (
+        <div 
+          onClick={onClose}
+          className="sidebar-backdrop"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(6, 9, 19, 0.6)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 90,
+            transition: 'opacity 0.25s ease'
           }}
-        >
-          <PlusCircle size={19} /> New Analysis
-        </NavLink>
+        />
+      )}
 
-        <div className="flex flex-col gap-2">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.to;
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className="flex items-center gap-4 px-4 py-3.5 rounded-xl font-medium transition-all"
-                style={{
-                  textDecoration: 'none',
-                  backgroundColor: isActive ? 'var(--bg-secondary)' : 'transparent',
-                  color: isActive ? 'var(--text-main)' : 'var(--text-light)',
-                  fontWeight: isActive ? '600' : '500',
-                  fontSize: '0.97rem',
-                  letterSpacing: '-0.01em'
-                }}
-              >
-                <Icon size={20} style={{ color: isActive ? 'var(--primary)' : 'var(--text-light)' }} />
-                <span>{item.label}</span>
-                {isActive && (
-                  <span style={{ 
-                    marginLeft: 'auto', 
-                    width: '6px', 
-                    height: '6px', 
-                    borderRadius: '50%', 
-                    backgroundColor: 'var(--primary)' 
-                  }}></span>
-                )}
-              </NavLink>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="pt-6 border-t" style={{ borderColor: 'var(--border)' }}>
-        <NavLink 
-          to="/notifications" 
-          className="flex items-center justify-between px-4 py-3.5 rounded-xl hover-lift transition-all"
-          style={{ 
-            backgroundColor: location.pathname === '/notifications' ? 'var(--bg-secondary)' : 'transparent',
-            textDecoration: 'none', 
-            color: 'var(--text-main)',
-            fontWeight: '600',
-            fontSize: '0.97rem',
-            border: '1px solid var(--border)'
-          }}
-        >
-          <div className="flex items-center gap-2.5">
-            <Bell size={18} className="text-primary" />
-            <span>Notifications</span>
+      {/* Sidebar Container */}
+      <aside 
+        className={`app-sidebar ${isOpen ? 'sidebar-open' : ''}`}
+        style={{
+          width: '260px',
+          flexShrink: 0,
+          minHeight: 'calc(100vh - 74px)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '1.25rem 0.95rem',
+          backgroundColor: 'var(--bg-secondary)',
+          borderRight: '1px solid var(--border)',
+          transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
+        <div>
+          {/* Mobile close bar */}
+          <div className="sidebar-mobile-header" style={{ display: 'none', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-main)' }}>Workspace Menu</span>
+            <button onClick={onClose} className="btn btn-ghost" style={{ padding: '0.35rem' }} aria-label="Close sidebar">
+              <X size={18} />
+            </button>
           </div>
-          {unreadCount > 0 && (
-            <span style={{ 
-              background: 'var(--error)', 
-              color: 'white', 
-              fontSize: '0.75rem', 
-              padding: '0.15rem 0.55rem', 
-              borderRadius: 'var(--radius-full)',
-              fontWeight: '700'
-            }}>
-              {unreadCount}
-            </span>
-          )}
-        </NavLink>
-      </div>
-    </aside>
+
+          {/* Quick Action Button */}
+          <Link
+            to="/analyze"
+            onClick={() => { if (onClose) onClose(); }}
+            className="btn btn-accent flex items-center justify-center gap-2 mb-6"
+            style={{
+              width: '100%',
+              padding: '0.65rem 1rem',
+              fontSize: '0.85rem',
+              borderRadius: '12px',
+              boxShadow: '0 4px 14px -1px rgba(37, 99, 235, 0.4)'
+            }}
+          >
+            <PlusCircle size={16} />
+            <span>New Venture Test</span>
+          </Link>
+
+          {/* Section Header */}
+          <div style={{
+            fontSize: '0.68rem',
+            fontWeight: '700',
+            textTransform: 'uppercase',
+            letterSpacing: '0.07em',
+            color: 'var(--text-muted)',
+            padding: '0 12px',
+            marginBottom: '8px'
+          }}>
+            Diagnostic Core
+          </div>
+
+          <nav>
+            {navItems.map((item) => (
+              <NavItem key={item.to} item={item} />
+            ))}
+          </nav>
+        </div>
+
+        <div>
+          {/* Pro Plan / Engine Status Card */}
+          <div style={{
+            padding: '0.85rem',
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(6, 182, 212, 0.08) 100%)',
+            border: '1px solid rgba(6, 182, 212, 0.2)',
+            marginBottom: '1rem'
+          }}>
+            <div className="flex items-center gap-2 mb-1.5">
+              <Sparkles size={14} className="text-accent" />
+              <span style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-main)' }}>AI Diagnostic V2.4</span>
+            </div>
+            <p style={{ fontSize: '0.72rem', color: 'var(--text-light)', lineHeight: 1.4, margin: 0 }}>
+              Cobalt-Cyan model: Market sizing & financial simulators active.
+            </p>
+          </div>
+
+          <div style={{
+            fontSize: '0.68rem',
+            fontWeight: '700',
+            textTransform: 'uppercase',
+            letterSpacing: '0.07em',
+            color: 'var(--text-muted)',
+            padding: '0 12px',
+            marginBottom: '8px'
+          }}>
+            Account & Prefs
+          </div>
+
+          <nav>
+            {bottomItems.map((item) => (
+              <NavItem key={item.to} item={item} />
+            ))}
+          </nav>
+        </div>
+      </aside>
+    </>
   );
 }
