@@ -97,8 +97,94 @@ export function generateClientAnalysis(formData) {
         `Regulatory evolution in digital data compliance and operational standards`
       ]
     },
-    competitors,
+    competitors: competitors.map((c, i) => ({
+      ...c,
+      pricingInfo: i === 0 ? '$49 - $99/mo' : '$19 - $39/mo'
+    })),
+    sentimentAnalysis: {
+      competitor: competitors[0]?.name || 'Industry Incumbents',
+      category,
+      overall_sentiment: 'Positive',
+      polarity_score: 0.65,
+      sentiment_distribution: {
+        positive_pct: 70.0,
+        neutral_pct: 20.0,
+        negative_pct: 10.0,
+        positive_count: 35,
+        neutral_count: 10,
+        negative_count: 5,
+        total_reviews_analyzed: 50
+      },
+      customer_reviews: [
+        { user: 'Pilot Customer', text: 'Clean interface and rapid onboarding. Saved our operational team hours weekly.', sentiment: 'Positive' },
+        { user: 'Beta Tester', text: 'Solid performance, though documentation could be more extensive.', sentiment: 'Neutral' },
+        { user: 'Industry Lead', text: 'Pricing is very fair relative to legacy enterprise alternatives.', sentiment: 'Positive' }
+      ]
+    },
+    dynamicPricing: {
+      category,
+      pricing_unit: category === 'saas' ? 'per user / month' : 'per unit / order',
+      unit_cost: Math.round(amount * 0.0004) || 15,
+      recommended_price: Math.round((amount * 0.0004 || 15) * 3.5),
+      min_suggested_price: Math.round((amount * 0.0004 || 15) * 1.8),
+      max_suggested_price: Math.round((amount * 0.0004 || 15) * 5.2),
+      gross_profit_per_unit: Math.round((amount * 0.0004 || 15) * 2.5),
+      gross_margin_pct: 71.4,
+      estimated_net_margin_pct: 32.5,
+      pricing_strategy: 'Value-Based Competitive Penetration Strategy',
+      competitor_price_benchmarks: {
+        budget_entry: 19,
+        market_median: 49,
+        premium_tier: 99
+      },
+      investment_suitability: {
+        status: amount >= 25000 ? 'Lean & Optimal Seed Runway' : 'Underfunded for Category',
+        score: amount >= 25000 ? 84 : 50,
+        analysis: amount >= 25000
+          ? `Your budget provides sufficient runway for 9-12 months of development and early pilot traction.`
+          : `Budget is lean. Prioritize non-dilutive seed grants (SISFS/TANSEED) to bridge the startup gap.`,
+        budget_entered: amount
+      }
+    },
     financialForecast: {
+      inputs: {
+        total_investment: setupCost,
+        unit_price: 49,
+        variable_cost_per_unit: 14,
+        monthly_fixed_costs: Math.round(setupCost * 0.08),
+        projected_monthly_units: Math.max(50, Math.round(setupCost * 0.005))
+      },
+      startup_capital_allocation: {
+        capital_expenditure_capex: Math.round(setupCost * 0.3),
+        operating_reserve_opex: Math.round(setupCost * 0.45),
+        working_capital_buffer: Math.round(setupCost * 0.25),
+        total_startup_capital: setupCost
+      },
+      unit_economics: {
+        contribution_margin_dollar: 35,
+        contribution_margin_ratio: 71.4,
+        gross_margin_pct: 71.4,
+        net_profit_margin_pct: 32.0
+      },
+      break_even_analysis: {
+        is_achievable: true,
+        break_even_units_monthly: Math.ceil((setupCost * 0.08) / 35),
+        break_even_revenue_monthly: Math.ceil((setupCost * 0.08) / 35) * 49,
+        break_even_summary: `Break-even is achieved around Month ${breakEvenMonth} at ~${Math.ceil((setupCost * 0.08) / 35)} units/month.`
+      },
+      annual_projections: {
+        year_1_gross_revenue: projectedRevenue,
+        year_1_net_profit: Math.round(projectedRevenue * 0.3),
+        roi_pct: Math.round(((projectedRevenue * 0.3) / (setupCost || 1)) * 100),
+        investment_recovery_timeline: `Month ${breakEvenMonth} (Full principal capital recovered within Year 1)`,
+        payback_month: breakEvenMonth
+      },
+      monthly_cash_flows: [
+        { month: 'M1', units: 25, revenue: 1225, expenses: Math.round(setupCost * 0.08 + 350), net_cash_flow: -Math.round(setupCost * 0.08 * 0.6) },
+        { month: 'M3', units: 60, revenue: 2940, expenses: Math.round(setupCost * 0.08 + 840), net_cash_flow: 400 },
+        { month: 'M6', units: 120, revenue: 5880, expenses: Math.round(setupCost * 0.08 + 1680), net_cash_flow: 1800 },
+        { month: 'M12', units: 240, revenue: 11760, expenses: Math.round(setupCost * 0.08 + 3360), net_cash_flow: 4100 }
+      ],
       estimatedCost: `₹${setupCost.toLocaleString('en-IN')}`,
       revenueForecast: `₹${projectedRevenue.toLocaleString('en-IN')}`,
       breakEvenMonth: `Month ${breakEvenMonth}`,
@@ -106,6 +192,14 @@ export function generateClientAnalysis(formData) {
       burnRateEstimate: `₹${Math.round(setupCost / 12).toLocaleString('en-IN')}/mo`,
       grossMargin: '62%'
     },
+    milestones: [
+      { id: 'm1', title: 'Idea Viability & Moats Validated', status: 'completed', targetDate: 'Month 1', completedAt: new Date().toISOString() },
+      { id: 'm2', title: 'Legal Structure & MSME Registration', status: 'in_progress', targetDate: 'Month 2' },
+      { id: 'm3', title: 'MVP / Prototype Developed', status: 'pending', targetDate: 'Month 4' },
+      { id: 'm4', title: 'Government Grant (SISFS/TANSEED) Filed', status: 'pending', targetDate: 'Month 5' },
+      { id: 'm5', title: 'First 50 Paying Customers Acquired', status: 'pending', targetDate: 'Month 7' },
+      { id: 'm6', title: 'Break-Even Run Rate Reached', status: 'pending', targetDate: 'Month 10' }
+    ],
     legalChecklist: [
       'Business Entity Registration (Private Limited / LLP)',
       'GST & MSME (Udyam) Registration',

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import { User, Mail, Briefcase, Award, LogOut, CheckCircle, Save, TrendingUp, BarChart2, Lightbulb, Sparkles, Building, Globe } from 'lucide-react';
+import { User, Mail, Briefcase, Award, LogOut, CheckCircle, Save, TrendingUp, BarChart2, Lightbulb, Sparkles, Building, Globe, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { apiGet, apiFetch } from '../utils/safeApi';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -19,25 +20,57 @@ export default function Profile() {
   const [company, setCompany] = useState(user?.company || 'EcoBox Solutions');
   const [industry, setIndustry] = useState(user?.industry || 'CleanTech / Sustainability');
   const [savedMsg, setSavedMsg] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [ideaCount, setIdeaCount] = useState(3);
   const [savedSchemeCount, setSavedSchemeCount] = useState(4);
 
   useEffect(() => {
-    try {
-      const u = JSON.parse(localStorage.getItem('nexoraUser') || 'null');
-      const key = u ? `nexoraIdeas_${u.email}` : 'nexoraIdeas_anonymous';
-      const stored = JSON.parse(localStorage.getItem(key) || '[]');
-      if (stored.length > 0) setIdeaCount(stored.length);
-      const schemes = JSON.parse(localStorage.getItem('savedSchemeNames') || '[]');
-      if (schemes.length > 0) setSavedSchemeCount(schemes.length);
-    } catch {}
+    const loadProfile = async () => {
+      try {
+        const { data } = await apiGet('/api/auth/me');
+        if (data?.user) {
+          const u = data.user;
+          setUser(u);
+          if (u.name) setName(u.name);
+          if (u.email) setEmail(u.email);
+          if (u.company) setCompany(u.company);
+          if (u.industry) setIndustry(u.industry);
+        }
+      } catch {}
+
+      try {
+        const u = JSON.parse(localStorage.getItem('nexoraUser') || 'null');
+        const key = u ? `nexoraIdeas_${u.email}` : 'nexoraIdeas_anonymous';
+        const stored = JSON.parse(localStorage.getItem(key) || '[]');
+        if (stored.length > 0) setIdeaCount(stored.length);
+        const schemes = JSON.parse(localStorage.getItem('savedSchemeNames') || '[]');
+        if (schemes.length > 0) setSavedSchemeCount(schemes.length);
+      } catch {}
+    };
+
+    loadProfile();
   }, []);
 
-  const handleSaveProfile = (e) => {
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
+    setIsSaving(true);
     const updated = { ...user, name, email, company, industry };
+    
+    // Save to backend
+    try {
+      const token = localStorage.getItem('nexoraToken');
+      await apiFetch('/api/auth/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ name, company, industry }),
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+    } catch (err) {
+      console.warn('Backend profile update fallback to local:', err);
+    }
+
     localStorage.setItem('nexoraUser', JSON.stringify(updated));
     setUser(updated);
+    setIsSaving(false);
     setSavedMsg(true);
     setTimeout(() => setSavedMsg(false), 2500);
   };
@@ -51,16 +84,8 @@ export default function Profile() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="flex dashboard-layout" style={{ minHeight: 'calc(100vh - 74px)' }}>
-      <Sidebar isOpen={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} />
-
-      <main className="flex-grow dashboard-main" style={{ backgroundColor: 'var(--bg-color)', overflowY: 'auto', padding: '1.5rem 2rem' }}>
-        <div className="dashboard-mobile-topbar" style={{ marginBottom: '0.5rem' }}>
-          <button className="sidebar-toggle-btn" onClick={() => setMobileSidebarOpen(true)} aria-label="Open menu">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-          </button>
-          <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-main)' }}>Founder Profile</span>
-        </div>
+    <div style={{ minHeight: 'calc(100vh - 74px)', backgroundColor: 'var(--bg-color)' }}>
+      <main className="container" style={{ padding: '2rem 1.5rem', maxWidth: '1100px', margin: '0 auto' }}>
         <div className="flex justify-between items-center mb-8 max-w-5xl">
           <div className="flex items-center gap-3">
             <User size={24} className="text-accent" />

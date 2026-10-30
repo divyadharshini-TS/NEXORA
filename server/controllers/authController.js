@@ -138,6 +138,8 @@ export const login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        company: user.company || '',
+        industry: user.industry || '',
         isAdmin: user.isAdmin,
       },
     });
@@ -146,3 +148,74 @@ export const login = async (req, res) => {
     return res.status(500).json({ message: 'Login failed.' });
   }
 };
+
+export const getProfile = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    if (mongoose.connection.readyState === 1) {
+      const found = await User.findById(user.id).select('-passwordHash');
+      if (found) {
+        return res.json({ user: found });
+      }
+    }
+
+    const mem = memoryUsers.find((u) => u._id === user.id || u.email === user.email);
+    if (mem) {
+      const { passwordHash, ...safe } = mem;
+      return res.json({ user: safe });
+    }
+
+    return res.json({ user });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, company, industry } = req.body || {};
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    if (mongoose.connection.readyState === 1) {
+      const updated = await User.findByIdAndUpdate(
+        userId,
+        {
+          ...(name ? { name: String(name).trim() } : {}),
+          ...(company !== undefined ? { company: String(company).trim() } : {}),
+          ...(industry !== undefined ? { industry: String(industry).trim() } : {}),
+        },
+        { new: true }
+      ).select('-passwordHash');
+
+      if (updated) {
+        return res.json({ message: 'Profile updated successfully', user: updated });
+      }
+    }
+
+    // In-memory update
+    const mem = memoryUsers.find((u) => u._id === userId || u.email === req.user?.email);
+    if (mem) {
+      if (name) mem.name = String(name).trim();
+      if (company !== undefined) mem.company = String(company).trim();
+      if (industry !== undefined) mem.industry = String(industry).trim();
+      const { passwordHash, ...safe } = mem;
+      return res.json({ message: 'Profile updated successfully', user: safe });
+    }
+
+    return res.json({
+      message: 'Profile updated successfully',
+      user: { id: userId, name, company, industry },
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+

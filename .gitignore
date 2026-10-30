@@ -28,3 +28,11 @@ dist-ssr
 .env.local
 .env.*.local
 server/.env
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+

@@ -1,0 +1,15 @@
+{
+  "cat_cols": [
+    "cat_cleantech",
+    "cat_ecommerce",
+    "cat_edtech",
+    "cat_fintech",
+    "cat_healthtech",
+    "cat_saas"
+  ],
+  "stage_cols": [
+    "stage_mvp",
+    "stage_prototype",
+    "stage_revenue"
+  ]
+}

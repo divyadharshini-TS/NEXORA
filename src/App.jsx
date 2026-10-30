@@ -138,6 +138,46 @@ function Navbar() {
           {isLoggedIn ? (
             <div className="flex items-center gap-2">
               <Link 
+                to="/analyze" 
+                className="btn btn-accent flex items-center gap-1.5" 
+                style={{ padding: '0.45rem 0.95rem', fontSize: '0.84rem' }}
+              >
+                <PlusCircle size={15} />
+                <span>New Test</span>
+              </Link>
+              <Link 
+                to="/notifications" 
+                className="btn btn-outline" 
+                title="Alerts & Feed"
+                style={{ 
+                  padding: '0.5rem', 
+                  borderRadius: 'var(--radius-sm)',
+                  width: '36px',
+                  height: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <Bell size={16} />
+              </Link>
+              <Link 
+                to="/settings" 
+                className="btn btn-outline" 
+                title="Settings"
+                style={{ 
+                  padding: '0.5rem', 
+                  borderRadius: 'var(--radius-sm)',
+                  width: '36px',
+                  height: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <SettingsIcon size={16} />
+              </Link>
+              <Link 
                 to="/profile" 
                 className="btn btn-outline flex items-center gap-2" 
                 style={{ padding: '0.45rem 0.95rem', fontSize: '0.86rem', borderRadius: 'var(--radius-full)' }}
@@ -182,7 +222,7 @@ function Navbar() {
         {/* Mobile menu toggle button */}
         <div className="mobile-nav-toggle-wrap" style={{ display: 'none', gap: '0.5rem' }}>
           <button 
-            onClick={toggleTheme}
+            onClick={toggleTheme} 
             className="btn btn-outline"
             style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', width: '40px', height: '40px' }}
             aria-label="Toggle theme"
@@ -222,6 +262,19 @@ function Navbar() {
               {item.label}
             </NavLink>
           ))}
+          {isLoggedIn && (
+            <>
+              <NavLink to="/analyze" className="nav-link" style={{ fontSize: '1rem', padding: '0.4rem 0', color: 'var(--accent)', fontWeight: '600' }}>
+                + New Venture Test
+              </NavLink>
+              <NavLink to="/notifications" className="nav-link" style={{ fontSize: '1rem', padding: '0.4rem 0' }}>
+                Alerts & Updates
+              </NavLink>
+              <NavLink to="/settings" className="nav-link" style={{ fontSize: '1rem', padding: '0.4rem 0' }}>
+                Settings
+              </NavLink>
+            </>
+          )}
           <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
             <button onClick={toggleTheme} className="btn btn-outline flex items-center gap-2" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
               {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}

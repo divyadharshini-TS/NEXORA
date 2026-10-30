@@ -1,0 +1,36 @@
+{
+  "status": "trained_and_evaluated",
+  "timestamp": "2026-10-30T18:29:13.365103",
+  "frameworks": {
+    "scikit_learn": "1.9.1",
+    "pandas": "3.1.0",
+    "numpy": "2.4.6",
+    "nltk": "3.10.4"
+  },
+  "viability_metrics": {
+    "viability_classification": {
+      "model": "RandomForestClassifier",
+      "accuracy": 0.9133,
+      "precision": 0.9032,
+      "recall": 0.9751,
+      "f1_score": 0.9378,
+      "test_samples": 300
+    },
+    "viability_regression": {
+      "model": "GradientBoostingRegressor",
+      "mae": 3.02,
+      "r2_score": 0.9595
+    }
+  },
+  "sentiment_metrics": {
+    "model": "LogisticRegression with TF-IDF",
+    "accuracy": 1.0,
+    "f1_score": 1.0,
+    "classes": [
+      "Negative (-1)",
+      "Neutral (0)",
+      "Positive (1)"
+    ],
+    "test_samples": 42
+  }
+}

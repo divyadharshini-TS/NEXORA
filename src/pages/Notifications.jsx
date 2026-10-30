@@ -52,16 +52,8 @@ export default function Notifications() {
   };
 
   return (
-    <div className="flex dashboard-layout" style={{ minHeight: 'calc(100vh - 74px)' }}>
-      <Sidebar isOpen={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} />
-
-      <main className="flex-grow dashboard-main" style={{ backgroundColor: 'var(--bg-color)', overflowY: 'auto', padding: '1.5rem 2rem' }}>
-        <div className="dashboard-mobile-topbar" style={{ marginBottom: '0.5rem' }}>
-          <button className="sidebar-toggle-btn" onClick={() => setMobileSidebarOpen(true)} aria-label="Open menu">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-          </button>
-          <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-main)' }}>Alerts & Feed</span>
-        </div>
+    <div style={{ minHeight: 'calc(100vh - 74px)', backgroundColor: 'var(--bg-color)' }}>
+      <main className="container" style={{ padding: '2rem 1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
         <div className="flex flex-wrap justify-between items-center mb-8 gap-4 max-w-4xl">
           <div>
             <div className="flex items-center gap-3 mb-1">

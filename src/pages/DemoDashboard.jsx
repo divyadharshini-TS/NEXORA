@@ -53,11 +53,8 @@ export default function DemoDashboard() {
         </Link>
       </div>
 
-      <div className="flex flex-grow">
-        <Sidebar isDemo={true} />
-
-        {/* Main Content */}
-        <main className="flex-grow p-6 lg:p-8" style={{ backgroundColor: 'var(--bg-color)', overflowY: 'auto' }}>
+      <div style={{ minHeight: 'calc(100vh - 74px)', backgroundColor: 'var(--bg-color)' }}>
+        <main className="container" style={{ padding: '2rem 1.5rem', maxWidth: '1440px', margin: '0 auto' }}>
           <div className="flex flex-wrap justify-between items-center mb-8 gap-4 pb-6 border-b" style={{ borderColor: 'var(--border)' }}>
             <div>
               <div className="flex items-center gap-2 mb-1">

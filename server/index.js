@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoutes.js';
 import analysisRoutes from './routes/analysisRoutes.js';
 import schemeRoutes from './routes/schemeRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 import { seedSchemeCatalog } from './seedSchemes.js';
 import { seedDemoUser } from './controllers/authController.js';
 
@@ -15,18 +16,30 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/nexora';
 
-// CORS: allow local dev + Vercel production frontend
+// CORS: allow any localhost port (5173, 5174, etc.), Vercel preview/prod, and custom FRONTEND_URL
 const allowedOrigins = [
   'http://localhost:5173',
+  'http://localhost:5174',
   'http://localhost:4173',
-  process.env.FRONTEND_URL, // e.g. https://nexora.vercel.app
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, curl, Render health checks)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.some(o => origin.startsWith(o))) {
+
+    // Allow any localhost or 127.0.0.1 port in development
+    const isLocalhost = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+    const isAllowedConfig = allowedOrigins.some((o) => origin.startsWith(o));
+    let isVercel = false;
+    try {
+      isVercel = new URL(origin).hostname.endsWith('.vercel.app');
+    } catch {}
+
+    if (isLocalhost || isAllowedConfig || isVercel) {
       return callback(null, true);
     }
     callback(new Error(`CORS: origin ${origin} not allowed`));
@@ -47,6 +60,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/analyze', analysisRoutes);
 app.use('/api/schemes', schemeRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ─── 404 handler: always return JSON, never HTML ───────────────────────────
 app.use((req, res) => {
